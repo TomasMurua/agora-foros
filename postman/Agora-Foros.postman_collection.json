@@ -1,0 +1,2926 @@
+{
+  "info": {
+    "_postman_id": "394d9bbd-fc4d-424e-9827-5f01479531a3",
+    "name": "Agora Foros",
+    "description": "Pruebas de los microservicios ms-usuarios (puerto 8081) y ms-foro (puerto 8082). Ejecutar las carpetas en orden: primero Autenticación, que guarda los tokens.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "ms-usuarios",
+      "item": [
+        {
+          "name": "Autenticación",
+          "item": [
+            {
+              "name": "Login ADMIN",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 200) { pm.collectionVariables.set(\"tokenAdmin\", pm.response.json().token); }",
+                      "pm.test(\"Rol ADMIN\", function () { pm.expect(pm.response.json().usuario.rol).to.eql(\"ADMIN\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/auth/login",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"usuario\": \"admin\",\n  \"password\": \"Admin2026!\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Login MODERADOR (con correo)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 200) { pm.collectionVariables.set(\"tokenModerador\", pm.response.json().token); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/auth/login",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"usuario\": \"moderador@agoraforos.cl\",\n  \"password\": \"Moder2026!\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Login USUARIO camila.diaz",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 200) { pm.collectionVariables.set(\"tokenCamila\", pm.response.json().token); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/auth/login",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"usuario\": \"camila.diaz\",\n  \"password\": \"Usuario2026!\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Login USUARIO matias.soto",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 200) { pm.collectionVariables.set(\"tokenMatias\", pm.response.json().token); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/auth/login",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"usuario\": \"matias.soto\",\n  \"password\": \"Usuario2026!\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Login con contraseña incorrecta (401)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 401\", function () { pm.response.to.have.status(401); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/auth/login",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"usuario\": \"admin\",\n  \"password\": \"incorrecta\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            }
+          ],
+          "description": "Inicio de sesión. Cada login guarda su token en una variable de la colección."
+        },
+        {
+          "name": "Roles",
+          "item": [
+            {
+              "name": "Listar roles",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Hay al menos 3 roles\", function () { pm.expect(pm.response.json()._embedded.roles.length).to.be.at.least(3); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/roles",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "roles"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Obtener rol por id",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/roles/1",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "roles",
+                    "1"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Crear rol (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 201) { pm.collectionVariables.set(\"nuevoRolId\", pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/roles",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "roles"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"EDITOR\",\n  \"descripcion\": \"Puede destacar temas en portada\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Actualizar rol (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/roles/{{nuevoRolId}}",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "roles",
+                    "{{nuevoRolId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"EDITOR\",\n  \"descripcion\": \"Destaca temas y revisa reportes\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Crear rol como USUARIO (403)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/roles",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "roles"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"SUPERUSUARIO\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar rol base ADMIN (409)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 409\", function () { pm.response.to.have.status(409); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/roles/1",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "roles",
+                    "1"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar rol (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/roles/{{nuevoRolId}}",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "roles",
+                    "{{nuevoRolId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Usuarios",
+          "item": [
+            {
+              "name": "Registrar usuario (público)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 201) { pm.collectionVariables.set(\"nuevoUsuarioId\", pm.response.json().id); }",
+                      "pm.test(\"Queda con rol USUARIO\", function () { pm.expect(pm.response.json().rol).to.eql(\"USUARIO\"); });",
+                      "pm.test(\"No devuelve la contraseña\", function () { pm.expect(pm.response.json()).to.not.have.property(\"password\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/usuarios",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "usuarios"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombreUsuario\": \"javiera.munoz\",\n  \"correo\": \"javiera.munoz@correo.cl\",\n  \"password\": \"Foro2026x\",\n  \"nombreCompleto\": \"Javiera Muñoz\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Registrar con datos inválidos (400)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/usuarios",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "usuarios"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombreUsuario\": \"j\",\n  \"correo\": \"correo-malo\",\n  \"password\": \"123\",\n  \"nombreCompleto\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Registrar usuario repetido (409)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 409\", function () { pm.response.to.have.status(409); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/usuarios",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "usuarios"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombreUsuario\": \"javiera.munoz\",\n  \"correo\": \"otra@correo.cl\",\n  \"password\": \"Foro2026x\",\n  \"nombreCompleto\": \"Repetida\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Login del usuario registrado",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 200) { pm.collectionVariables.set(\"tokenNuevo\", pm.response.json().token); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/auth/login",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"usuario\": \"javiera.munoz\",\n  \"password\": \"Foro2026x\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Mi cuenta (usuario con sesión)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/usuarios/me",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "usuarios",
+                    "me"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenNuevo}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Modificar mis datos (USUARIO)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/usuarios/{{nuevoUsuarioId}}",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "usuarios",
+                    "{{nuevoUsuarioId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombreCompleto\": \"Javiera Muñoz Reyes\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenNuevo}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "USUARIO intenta cambiarse el rol (403)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/usuarios/{{nuevoUsuarioId}}",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "usuarios",
+                    "{{nuevoUsuarioId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rolId\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenNuevo}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Listar usuarios (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/usuarios",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "usuarios"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Listar usuarios por rol (MODERADOR)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/usuarios?rol=USUARIO",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "usuarios"
+                  ],
+                  "query": [
+                    {
+                      "key": "rol",
+                      "value": "USUARIO"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Listar usuarios como USUARIO (403)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/usuarios",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "usuarios"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Listar usuarios sin token (401)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 401\", function () { pm.response.to.have.status(401); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/usuarios",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "usuarios"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Obtener usuario por id (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/usuarios/{{nuevoUsuarioId}}",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "usuarios",
+                    "{{nuevoUsuarioId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Obtener usuario inexistente (404)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 404\", function () { pm.response.to.have.status(404); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/usuarios/9999",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "usuarios",
+                    "9999"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Cambiar rol a MODERADOR (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Rol MODERADOR\", function () { pm.expect(pm.response.json().rol).to.eql(\"MODERADOR\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/usuarios/{{nuevoUsuarioId}}",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "usuarios",
+                    "{{nuevoUsuarioId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rolId\": 2\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Bloquear cuenta (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/usuarios/{{nuevoUsuarioId}}",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "usuarios",
+                    "{{nuevoUsuarioId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"activo\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Login de cuenta bloqueada (403)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/auth/login",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"usuario\": \"javiera.munoz\",\n  \"password\": \"Foro2026x\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Eliminar usuario (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{usuariosUrl}}/api/usuarios/{{nuevoUsuarioId}}",
+                  "host": [
+                    "{{usuariosUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "usuarios",
+                    "{{nuevoUsuarioId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ms-foro",
+      "item": [
+        {
+          "name": "Categorías",
+          "item": [
+            {
+              "name": "Listar categorías",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Al menos 5 categorías\", function () { pm.expect(pm.response.json()._embedded.categorias.length).to.be.at.least(5); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/categorias",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "categorias"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Obtener categoría",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/categorias/2",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "categorias",
+                    "2"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Temas de una categoría",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/categorias/1/temas",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "categorias",
+                    "1",
+                    "temas"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Crear categoría (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 201) { pm.collectionVariables.set(\"nuevaCategoriaId\", pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/categorias",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "categorias"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Libros\",\n  \"descripcion\": \"Recomendaciones de lectura, autores y clubes de lectura.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Crear categoría repetida (409)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 409\", function () { pm.response.to.have.status(409); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/categorias",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "categorias"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"libros\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Crear categoría como USUARIO (403)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/categorias",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "categorias"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Cocina\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Actualizar categoría (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/categorias/{{nuevaCategoriaId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "categorias",
+                    "{{nuevaCategoriaId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Libros y Cómics\",\n  \"descripcion\": \"Lectura, novelas gráficas y cómics.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar categoría con temas (409)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 409\", function () { pm.response.to.have.status(409); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/categorias/1",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "categorias",
+                    "1"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar categoría (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/categorias/{{nuevaCategoriaId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "categorias",
+                    "{{nuevaCategoriaId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Temas",
+          "item": [
+            {
+              "name": "Buscar todos los temas",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Buscar por texto",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas?q=spring",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "spring"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Buscar por categoría y texto",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas?categoriaId=3&q=series",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas"
+                  ],
+                  "query": [
+                    {
+                      "key": "categoriaId",
+                      "value": "3"
+                    },
+                    {
+                      "key": "q",
+                      "value": "series"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Buscar por autor",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas?autor=camila.diaz",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas"
+                  ],
+                  "query": [
+                    {
+                      "key": "autor",
+                      "value": "camila.diaz"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Buscar temas cerrados",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas?estado=CERRADO",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas"
+                  ],
+                  "query": [
+                    {
+                      "key": "estado",
+                      "value": "CERRADO"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Temas más vistos",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/populares?limite=3",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "populares"
+                  ],
+                  "query": [
+                    {
+                      "key": "limite",
+                      "value": "3"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Visualizar tema (suma una visita)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/1",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "1"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Publicar tema sin sesión (401)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 401\", function () { pm.response.to.have.status(401); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"categoriaId\": 2,\n  \"titulo\": \"Tema sin sesión\",\n  \"contenido\": \"Esto no debería publicarse.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Publicar tema con datos inválidos (400)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"titulo\": \"abc\",\n  \"contenido\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenMatias}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Publicar tema (matias.soto)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 201) { pm.collectionVariables.set(\"nuevoTemaId\", pm.response.json().id); }",
+                      "pm.test(\"El autor sale del token\", function () { pm.expect(pm.response.json().autor).to.eql(\"matias.soto\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"categoriaId\": 2,\n  \"titulo\": \"Torneo de la comunidad en diciembre\",\n  \"contenido\": \"Propongo organizar un torneo en línea para fin de año. ¿Quién se anota?\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenMatias}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Editar tema (autor)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/{{nuevoTemaId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "{{nuevoTemaId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"titulo\": \"Torneo de la comunidad: sábado 12 de diciembre\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenMatias}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Editar tema ajeno (403)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/{{nuevoTemaId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "{{nuevoTemaId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"titulo\": \"Título cambiado por otra persona\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Comentarios",
+          "item": [
+            {
+              "name": "Comentarios de un tema",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/1/comentarios",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "1",
+                    "comentarios"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Comentar tema (camila.diaz)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 201) { pm.collectionVariables.set(\"nuevoComentarioId\", pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/{{nuevoTemaId}}/comentarios",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "{{nuevoTemaId}}",
+                    "comentarios"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contenido\": \"¡Me anoto! Juego en PC.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Comentar tema (moderador)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/{{nuevoTemaId}}/comentarios",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "{{nuevoTemaId}}",
+                    "comentarios"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contenido\": \"Recuerden respetar las normas del foro durante el torneo.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Obtener comentario",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/comentarios/{{nuevoComentarioId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "comentarios",
+                    "{{nuevoComentarioId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Editar comentario (autora)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/comentarios/{{nuevoComentarioId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "comentarios",
+                    "{{nuevoComentarioId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contenido\": \"¡Me anoto! Juego en PC los fines de semana.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Editar comentario ajeno (403)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/comentarios/{{nuevoComentarioId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "comentarios",
+                    "{{nuevoComentarioId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contenido\": \"Comentario cambiado\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenMatias}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar comentario ajeno como USUARIO (403)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/comentarios/{{nuevoComentarioId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "comentarios",
+                    "{{nuevoComentarioId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenMatias}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar comentario (MODERADOR)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/comentarios/{{nuevoComentarioId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "comentarios",
+                    "{{nuevoComentarioId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Moderación de temas",
+          "item": [
+            {
+              "name": "Cerrar tema (MODERADOR)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Estado CERRADO\", function () { pm.expect(pm.response.json().estado).to.eql(\"CERRADO\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/{{nuevoTemaId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "{{nuevoTemaId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"estado\": \"CERRADO\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Comentar tema cerrado (409)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 409\", function () { pm.response.to.have.status(409); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/{{nuevoTemaId}}/comentarios",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "{{nuevoTemaId}}",
+                    "comentarios"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contenido\": \"Llegué tarde\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar tema ajeno como USUARIO (403)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/{{nuevoTemaId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "{{nuevoTemaId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar tema (autor)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/{{nuevoTemaId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "{{nuevoTemaId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenMatias}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Visualizar tema eliminado (404)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 404\", function () { pm.response.to.have.status(404); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/{{nuevoTemaId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "{{nuevoTemaId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "usuariosUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "foroUrl",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "tokenAdmin",
+      "value": ""
+    },
+    {
+      "key": "tokenModerador",
+      "value": ""
+    },
+    {
+      "key": "tokenCamila",
+      "value": ""
+    },
+    {
+      "key": "tokenMatias",
+      "value": ""
+    },
+    {
+      "key": "tokenNuevo",
+      "value": ""
+    },
+    {
+      "key": "nuevoRolId",
+      "value": ""
+    },
+    {
+      "key": "nuevoUsuarioId",
+      "value": ""
+    },
+    {
+      "key": "nuevaCategoriaId",
+      "value": ""
+    },
+    {
+      "key": "nuevoTemaId",
+      "value": ""
+    },
+    {
+      "key": "nuevoComentarioId",
+      "value": ""
+    }
+  ]
+}
