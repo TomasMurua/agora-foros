@@ -81,7 +81,7 @@ VALUES (5, 4, 'matias.soto', '¿Qué guitarra eléctrica recomiendan para empeza
         'Quiero aprender guitarra eléctrica y tengo un presupuesto acotado. ¿Conviene comprar usada o un pack de principiante?',
         'ABIERTO', 9, TIMESTAMP '2026-10-29 16:30:00');
 INSERT INTO FORO_MS.TEMAS (CATEGORIA_ID, USUARIO_ID, AUTOR, TITULO, CONTENIDO, ESTADO, VISTAS, FECHA_CREACION)
-VALUES (1, 2, 'moderador', 'Normas de la categoria Tecnología',
+VALUES (1, 2, 'moderador', 'Normas de la categoría Tecnología',
         'Antes de publicar, busca si tu pregunta ya fue respondida. Comparte código con formato y no publiques datos personales ni claves.',
         'CERRADO', 64, TIMESTAMP '2026-10-20 12:00:00');
 
