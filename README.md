@@ -1,10 +1,12 @@
-# Ágora Foros - Backend
+# Ágora Foros
 
-Backend de un sistema de foros en línea construido con microservicios en **Spring Boot 3** y base de datos **Oracle**.
-Los usuarios se registran, inician sesión, buscan y leen temas, publican y comentan. Los moderadores y administradores
-cuidan el contenido del foro.
+Backend de un foro en línea. Son dos microservicios en Spring Boot 3.5 que guardan sus datos en Oracle. Con ellos una
+persona se registra, inicia sesión, busca temas, los lee, publica y comenta. Los moderadores y administradores pueden
+cerrar temas y borrar lo que no corresponde.
 
-## Arquitectura
+Todavía no tiene frontend, así que todas las pruebas se hacen con Postman.
+
+## Cómo está armado
 
 ```
                  Postman / Frontend
@@ -24,64 +26,73 @@ cuidan el contenido del foro.
         +---------------------------------------+
 ```
 
-- **ms-usuarios**: CRUD de usuarios y roles, registro e inicio de sesión. Al iniciar sesión entrega un token JWT
-  con el id, el nombre de usuario y el rol.
-- **ms-foro**: búsqueda, visualización, publicación y comentarios de temas, organizados en categorías. Valida el
-  token emitido por ms-usuarios para saber quién hace cada operación.
-- Cada microservicio es dueño de su esquema en Oracle (`USUARIOS_MS` y `FORO_MS`).
+`ms-usuarios` corre en el puerto 8081 y maneja usuarios, roles e inicio de sesión. Cuando alguien entra con su usuario
+y contraseña, el servicio le devuelve un token JWT firmado con su id, su nombre de usuario y su rol.
 
-Cada servicio está organizado en capas: `controller` → `service` → `repository` → `model`, con DTOs validados
-(`jakarta.validation`), manejo global de errores (`@RestControllerAdvice`), respuestas HATEOAS, logging con SLF4J y
-seguridad con Spring Security (OAuth2 Resource Server + JWT).
+`ms-foro` corre en el puerto 8082 y maneja categorías, temas y comentarios. No consulta a `ms-usuarios`. Lee el token
+que llega en cada solicitud y con eso sabe quién publica y qué rol tiene. Lo preferí a una llamada entre servicios
+porque así `ms-foro` sigue atendiendo a quien ya inició sesión aunque `ms-usuarios` esté caído. El costo es que un
+token vale hasta que expira, dos horas después del login, aunque un administrador bloquee la cuenta entre medio.
+
+Cada servicio tiene su propio esquema en Oracle, `USUARIOS_MS` y `FORO_MS`, y ninguno lee las tablas del otro. Por eso
+`TEMAS.USUARIO_ID` no tiene llave foránea hacia `USUARIOS`.
+
+Los dos siguen el mismo orden de paquetes, `controller`, `service`, `repository` y `model`. Las solicitudes entran como
+DTOs con anotaciones de `jakarta.validation`. Un `@RestControllerAdvice` convierte cualquier error en el JSON que aparece
+más abajo. Las respuestas traen enlaces HATEOAS y cada operación queda registrada en el log con SLF4J.
 
 ## Roles
 
-| Rol | Privilegios |
-|-----|-------------|
-| `USUARIO` | Publica temas y comentarios. Edita o elimina solo su propio contenido y su cuenta. |
-| `MODERADOR` | Lo anterior, y además cierra temas, elimina temas y comentarios de otros usuarios y lista usuarios. |
-| `ADMIN` | Todo lo anterior, y además administra usuarios (rol, bloqueo, eliminación), roles y categorías. |
+| Rol | Qué puede hacer |
+|-----|-----------------|
+| `USUARIO` | Publica temas y comentarios. Edita o borra solo lo suyo, incluida su cuenta. |
+| `MODERADOR` | Lo mismo que un USUARIO. Además cierra temas, borra temas y comentarios de cualquiera y ve la lista de usuarios. |
+| `ADMIN` | Lo mismo que un MODERADOR. Además cambia roles, bloquea y elimina cuentas, y administra roles y categorías. |
 
-## Categorías del foro
+## Categorías
 
-Tecnología y Programación, Videojuegos, Cine y Series, Deportes y Música (se pueden agregar más con el rol ADMIN).
+El foro parte con cinco: Tecnología y Programación, Videojuegos, Cine y Series, Deportes y Música. Un ADMIN puede
+crear más.
 
 ## Requisitos
 
-- Java 21 (JDK)
-- Docker (para Oracle Database Free) o una base Oracle propia
+- JDK 21
+- Docker, para correr Oracle Database Free. También sirve otra base Oracle.
 - Postman
 
-## Puesta en marcha
+## Cómo levantarlo
 
-1. **Base de datos.** Levanta Oracle Free con los scripts de `bd/` ya cargados:
+1. Levanta la base de datos.
 
    ```bash
    docker compose up -d
    ```
 
-   El contenedor crea los esquemas, las tablas y los datos de prueba la primera vez que arranca (tarda alrededor de
-   un minuto). Para usar otra base Oracle, ejecuta como SYSTEM, en orden, `bd/01_crear_esquemas.sql`,
-   `bd/02_ms_usuarios.sql` y `bd/03_ms_foro.sql`.
+   La primera vez el contenedor ejecuta los tres scripts de `bd/`, que crean los esquemas, las tablas y los datos de
+   prueba. Tarda cerca de un minuto. Si usas otra base Oracle, ejecuta esos mismos scripts en orden, conectado como
+   SYSTEM.
 
-   Conexión con SQL Developer: host `localhost`, puerto `1521`, servicio `FREEPDB1`,
-   usuario `USUARIOS_MS` / `Usuarios_Ms2026` o `FORO_MS` / `Foro_Ms2026`.
+   Para revisar los datos con SQL Developer, conéctate a `localhost`, puerto `1521`, servicio `FREEPDB1`. Los usuarios
+   son `USUARIOS_MS` con clave `Usuarios_Ms2026` y `FORO_MS` con clave `Foro_Ms2026`.
 
-2. **Microservicios** (cada uno en su terminal):
+   `docker compose down` borra el contenedor y con él los datos. El siguiente `up` parte de cero.
+
+2. Levanta cada microservicio en su propia terminal.
 
    ```bash
-   cd ms-usuarios && ./mvnw spring-boot:run   # http://localhost:8081
-   cd ms-foro && ./mvnw spring-boot:run       # http://localhost:8082
+   cd ms-usuarios && ./mvnw spring-boot:run
+   cd ms-foro && ./mvnw spring-boot:run
    ```
 
-   La conexión se puede cambiar con las variables `DB_URL`, `DB_USER` y `DB_PASSWORD`. La clave de firma de los
-   tokens se define con `JWT_SECRET` y debe ser la misma en los dos servicios.
+   Las variables `DB_URL`, `DB_USER` y `DB_PASSWORD` cambian la conexión. `JWT_SECRET` es la clave que firma los
+   tokens y tiene que ser la misma en los dos servicios. Si no la defines, usan una clave de desarrollo y lo avisan en
+   el log.
 
-3. **Pruebas con Postman.** Importa `postman/Agora-Foros.postman_collection.json` y ejecuta primero la carpeta
-   *Autenticación*: cada login guarda su token en las variables de la colección. También se puede correr completa
-   con el Collection Runner.
+3. Importa `postman/Agora-Foros.postman_collection.json` en Postman y ejecuta primero la carpeta Autenticación. Cada
+   login guarda su token en una variable de la colección y el resto de las solicitudes lo usa. La colección también
+   corre completa en el Collection Runner. Tiene 63 solicitudes y cada una revisa el código de respuesta.
 
-4. **Tests unitarios:** `./mvnw test` dentro de cada microservicio.
+4. Los tests unitarios se corren con `./mvnw test` dentro de cada microservicio.
 
 ## Usuarios de prueba
 
@@ -95,44 +106,45 @@ Tecnología y Programación, Videojuegos, Cine y Series, Deportes y Música (se 
 
 ## Endpoints
 
-Las rutas marcadas con 🔒 requieren el header `Authorization: Bearer <token>`.
+Donde la columna Acceso dice "Con sesión" o nombra un rol, hay que mandar el header `Authorization: Bearer <token>`
+con el token del login.
 
-### ms-usuarios (`http://localhost:8081`)
+### ms-usuarios, `http://localhost:8081`
 
-| Método | Ruta | Descripción | Acceso |
-|--------|------|-------------|--------|
-| POST | `/api/auth/login` | Inicio de sesión con usuario o correo; devuelve el token | Público |
-| POST | `/api/usuarios` | Registro de usuario (un ADMIN puede indicar `rolId`) | Público |
-| GET | `/api/usuarios?rol=` | Lista usuarios, con filtro opcional por rol | 🔒 ADMIN, MODERADOR |
-| GET | `/api/usuarios/me` | Datos de la cuenta con sesión iniciada | 🔒 |
-| GET | `/api/usuarios/{id}` | Detalle de un usuario | 🔒 propio, ADMIN, MODERADOR |
-| PUT | `/api/usuarios/{id}` | Modifica datos; `rolId` y `activo` solo ADMIN | 🔒 propio, ADMIN |
-| DELETE | `/api/usuarios/{id}` | Elimina la cuenta | 🔒 propio, ADMIN |
-| GET | `/api/roles` · `/api/roles/{id}` | Lista o detalle de roles | Público |
-| POST · PUT · DELETE | `/api/roles` · `/api/roles/{id}` | Administración de roles | 🔒 ADMIN |
+| Método | Ruta | Qué hace | Acceso |
+|--------|------|----------|--------|
+| POST | `/api/auth/login` | Inicia sesión con nombre de usuario o correo y devuelve el token | Público |
+| POST | `/api/usuarios` | Registra un usuario. Un ADMIN con sesión puede indicar `rolId` | Público |
+| GET | `/api/usuarios?rol=` | Lista usuarios. El filtro por rol es opcional | ADMIN, MODERADOR |
+| GET | `/api/usuarios/me` | Devuelve la cuenta que inició sesión | Con sesión |
+| GET | `/api/usuarios/{id}` | Devuelve un usuario | La propia cuenta, ADMIN, MODERADOR |
+| PUT | `/api/usuarios/{id}` | Modifica datos. Solo un ADMIN cambia `rolId` y `activo` | La propia cuenta, ADMIN |
+| DELETE | `/api/usuarios/{id}` | Elimina la cuenta | La propia cuenta, ADMIN |
+| GET | `/api/roles`, `/api/roles/{id}` | Lista los roles o devuelve uno | Público |
+| POST, PUT, DELETE | `/api/roles`, `/api/roles/{id}` | Crea, modifica o elimina roles | ADMIN |
 
-### ms-foro (`http://localhost:8082`)
+### ms-foro, `http://localhost:8082`
 
-| Método | Ruta | Descripción | Acceso |
-|--------|------|-------------|--------|
-| GET | `/api/categorias` · `/api/categorias/{id}` | Lista o detalle de categorías | Público |
-| GET | `/api/categorias/{id}/temas` | Temas de una categoría | Público |
-| POST · PUT · DELETE | `/api/categorias` · `/api/categorias/{id}` | Administración de categorías | 🔒 ADMIN |
-| GET | `/api/temas?q=&categoriaId=&autor=&estado=` | Búsqueda de temas (filtros opcionales) | Público |
-| GET | `/api/temas/populares?limite=5` | Temas más vistos | Público |
-| GET | `/api/temas/{id}` | Detalle de un tema (suma una visita) | Público |
-| POST | `/api/temas` | Publica un tema | 🔒 |
-| PUT | `/api/temas/{id}` | Edita título, contenido o categoría (autor); abre o cierra (autor, MODERADOR, ADMIN) | 🔒 |
-| DELETE | `/api/temas/{id}` | Elimina el tema y sus comentarios | 🔒 autor, MODERADOR, ADMIN |
-| GET | `/api/temas/{id}/comentarios` | Comentarios de un tema | Público |
-| POST | `/api/temas/{id}/comentarios` | Comenta un tema abierto | 🔒 |
-| GET | `/api/comentarios/{id}` | Detalle de un comentario | Público |
-| PUT | `/api/comentarios/{id}` | Edita el comentario | 🔒 autor |
-| DELETE | `/api/comentarios/{id}` | Elimina el comentario | 🔒 autor, MODERADOR, ADMIN |
+| Método | Ruta | Qué hace | Acceso |
+|--------|------|----------|--------|
+| GET | `/api/categorias`, `/api/categorias/{id}` | Lista las categorías o devuelve una | Público |
+| GET | `/api/categorias/{id}/temas` | Lista los temas de una categoría | Público |
+| POST, PUT, DELETE | `/api/categorias`, `/api/categorias/{id}` | Crea, modifica o elimina categorías | ADMIN |
+| GET | `/api/temas?q=&categoriaId=&autor=&estado=` | Busca temas. Todos los filtros son opcionales | Público |
+| GET | `/api/temas/populares?limite=5` | Lista los temas más vistos | Público |
+| GET | `/api/temas/{id}` | Devuelve un tema y le suma una visita | Público |
+| POST | `/api/temas` | Publica un tema | Con sesión |
+| PUT | `/api/temas/{id}` | El autor cambia título, contenido o categoría. Autor, MODERADOR o ADMIN lo abren o cierran | Con sesión |
+| DELETE | `/api/temas/{id}` | Elimina el tema junto con sus comentarios | Autor, MODERADOR, ADMIN |
+| GET | `/api/temas/{id}/comentarios` | Lista los comentarios de un tema | Público |
+| POST | `/api/temas/{id}/comentarios` | Comenta un tema abierto | Con sesión |
+| GET | `/api/comentarios/{id}` | Devuelve un comentario | Público |
+| PUT | `/api/comentarios/{id}` | Edita el comentario | Autor |
+| DELETE | `/api/comentarios/{id}` | Elimina el comentario | Autor, MODERADOR, ADMIN |
 
 ### Errores
 
-Todos los errores responden en JSON con el mismo formato:
+Todos los errores vuelven en JSON con esta forma:
 
 ```json
 {
@@ -145,15 +157,20 @@ Todos los errores responden en JSON con el mismo formato:
 }
 ```
 
-Códigos usados: `400` datos inválidos, `401` sin sesión o credenciales incorrectas, `403` sin permisos o cuenta
-bloqueada, `404` recurso inexistente, `409` conflicto (duplicados, tema cerrado, categoría con temas).
+| Código | Cuándo aparece |
+|--------|----------------|
+| 400 | Faltan datos o vienen con un formato inválido |
+| 401 | No hay token, el token no sirve o la contraseña no coincide |
+| 403 | El rol no tiene permiso o la cuenta está bloqueada |
+| 404 | El recurso no existe |
+| 409 | Nombre o correo repetido, comentario en un tema cerrado o categoría que todavía tiene temas |
 
 ## Estructura del repositorio
 
 ```
 agora-foros/
-├── bd/                 scripts de Oracle (esquemas, tablas y datos)
-├── docker/initdb/      carga de los scripts al crear el contenedor
+├── bd/                 scripts de Oracle con esquemas, tablas y datos
+├── docker/initdb/      carga los scripts al crear el contenedor
 ├── docker-compose.yml  Oracle Database Free
 ├── ms-usuarios/        microservicio de usuarios, roles y login
 ├── ms-foro/            microservicio de categorías, temas y comentarios
