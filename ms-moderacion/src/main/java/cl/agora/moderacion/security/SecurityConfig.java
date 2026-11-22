@@ -34,6 +34,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health/**", "/actuator/info", "/error").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // Normas del foro: leerlas es publico, administrarlas es solo de ADMIN
+                        .requestMatchers(HttpMethod.GET, "/api/normas", "/api/normas/**").permitAll()
+                        .requestMatchers("/api/normas", "/api/normas/**").hasRole("ADMIN")
+                        // Reportes: cualquier usuario con sesion reporta, ve los suyos y retira uno pendiente
+                        .requestMatchers(HttpMethod.POST, "/api/reportes").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/reportes/mios", "/api/reportes/*").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/reportes/*").authenticated()
+                        // Bandeja de reportes y su revision: MODERADOR y ADMIN
+                        .requestMatchers("/api/reportes", "/api/reportes/**").hasAnyRole("MODERADOR", "ADMIN")
+                        // Sanciones: MODERADOR y ADMIN banean y restauran; solo ADMIN corrige o borra el historial
+                        .requestMatchers(HttpMethod.PUT, "/api/sanciones/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/sanciones/*").hasRole("ADMIN")
+                        .requestMatchers("/api/sanciones", "/api/sanciones/**").hasAnyRole("MODERADOR", "ADMIN")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth -> oauth
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
