@@ -1,0 +1,74 @@
+<div class="container py-4 py-lg-5">
+  <div class="auth-tarjeta row g-0">
+    <div class="col-12 col-md-5 auth-lado d-none d-md-flex">
+      <img src="ilustraciones/comunidad.svg" alt="" width="280" height="240" />
+      <h2 class="h4 mt-4">Súmate a la conversación</h2>
+      <ul class="lista-beneficios">
+        <li><i class="bi bi-check2-circle" aria-hidden="true"></i> Publica temas en cinco categorías</li>
+        <li><i class="bi bi-check2-circle" aria-hidden="true"></i> Comenta y edita tus respuestas</li>
+        <li><i class="bi bi-check2-circle" aria-hidden="true"></i> Reporta lo que no cumple las normas</li>
+      </ul>
+    </div>
+    <div class="col-12 col-md-7 auth-cuerpo">
+      <h1 class="titulo-pagina h2">Crear cuenta</h1>
+      <p class="texto-suave">¿Ya tienes una? <a routerLink="/iniciar-sesion">Inicia sesión</a>.</p>
+
+      <form [formGroup]="form" (ngSubmit)="registrar()" novalidate>
+        <div class="row g-3">
+          <div class="col-12">
+            <label for="r-nombre" class="form-label">Nombre completo</label>
+            <input id="r-nombre" type="text" class="form-control" formControlName="nombreCompleto" required
+              [attr.minlength]="limites.nombrePersona.min" [attr.maxlength]="limites.nombrePersona.max" [attr.pattern]="patrones.nombrePersona"
+              autocomplete="name" placeholder="Camila Díaz" [class.is-invalid]="invalido('nombreCompleto')" />
+            <app-campo-error [control]="form.controls.nombreCompleto" [enviado]="enviado()" />
+          </div>
+          <div class="col-12 col-lg-6">
+            <label for="r-usuario" class="form-label">Nombre de usuario</label>
+            <input id="r-usuario" type="text" class="form-control" formControlName="nombreUsuario" required
+              [attr.minlength]="limites.nombreUsuario.min" [attr.maxlength]="limites.nombreUsuario.max" [attr.pattern]="patrones.nombreUsuario"
+              autocomplete="username" placeholder="camila.diaz" aria-describedby="r-usuario-ayuda" [class.is-invalid]="invalido('nombreUsuario')" />
+            <div id="r-usuario-ayuda" class="form-text">Minúsculas, números, punto o guion bajo.</div>
+            <app-campo-error [control]="form.controls.nombreUsuario" [enviado]="enviado()" [mensajes]="{ yaExiste: 'Ese nombre de usuario ya está en uso.' }" />
+          </div>
+          <div class="col-12 col-lg-6">
+            <label for="r-correo" class="form-label">Correo</label>
+            <input id="r-correo" type="email" class="form-control" formControlName="correo" required
+              [attr.maxlength]="limites.correo.max" autocomplete="email" placeholder="nombre@correo.cl" [class.is-invalid]="invalido('correo')" />
+            <app-campo-error [control]="form.controls.correo" [enviado]="enviado()" [mensajes]="{ yaExiste: 'Ese correo ya tiene una cuenta. ¿Quieres iniciar sesión?' }" />
+          </div>
+          <div class="col-12 col-lg-6">
+            <label for="r-password" class="form-label">Contraseña</label>
+            <div class="input-group">
+              <input id="r-password" [type]="verPassword() ? 'text' : 'password'" class="form-control" formControlName="password" required
+                minlength="8" maxlength="20" autocomplete="new-password" aria-describedby="reglas-registro" [class.is-invalid]="invalido('password')" />
+              <button type="button" class="btn btn-outline-secondary" (click)="verPassword.set(!verPassword())"
+                [attr.aria-label]="verPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+                <i class="bi" [class.bi-eye]="!verPassword()" [class.bi-eye-slash]="verPassword()" aria-hidden="true"></i>
+              </button>
+            </div>
+            <app-campo-error [control]="form.controls.password" [enviado]="enviado()" />
+          </div>
+          <div class="col-12 col-lg-6">
+            <label for="r-confirmacion" class="form-label">Repite la contraseña</label>
+            <input id="r-confirmacion" [type]="verPassword() ? 'text' : 'password'" class="form-control" formControlName="confirmacion" required
+              maxlength="20" autocomplete="new-password" [class.is-invalid]="invalido('confirmacion')" />
+            <app-campo-error [control]="form.controls.confirmacion" [enviado]="enviado()" [mensajes]="{ required: 'Repite la contraseña para confirmarla.' }" />
+          </div>
+          <div class="col-12">
+            <app-checklist-password idLista="reglas-registro" [control]="form.controls.password" [nombreUsuario]="form.controls.nombreUsuario.value" />
+          </div>
+          <div class="col-12">
+            <div class="form-check">
+              <input id="r-normas" type="checkbox" class="form-check-input" formControlName="aceptaNormas" required [class.is-invalid]="invalido('aceptaNormas')" />
+              <label for="r-normas" class="form-check-label">Leí y acepto las <a routerLink="/normas" target="_blank">normas del foro</a>.</label>
+              <app-campo-error [control]="form.controls.aceptaNormas" [enviado]="enviado()" [mensajes]="{ required: 'Debes aceptar las normas para crear tu cuenta.' }" />
+            </div>
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary w-100 btn-lg" [disabled]="form.invalid && enviado()">Crear mi cuenta</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
