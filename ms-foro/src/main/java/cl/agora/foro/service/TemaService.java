@@ -34,7 +34,8 @@ public class TemaService {
             categoriaService.buscarEntidad(categoriaId);
         }
         boolean verBaneados = puedeModerar(actual);
-        List<Tema> temas = temaRepository.buscar(vacioANull(texto), categoriaId, vacioANull(autor), estado).stream()
+        List<Tema> temas = temaRepository.buscar(vacioANull(texto), categoriaId, vacioANull(autor),
+                        estado == null ? null : estado.name()).stream()
                 .filter(t -> verBaneados || !t.estaBaneado())
                 .toList();
         log.debug("Búsqueda de temas texto='{}' categoria={} autor='{}' estado={} -> {} resultado(s)",
@@ -134,10 +135,14 @@ public class TemaService {
         return aRespuesta(tema, true);
     }
 
-    /** El autor elimina su tema; MODERADOR y ADMIN pueden eliminar cualquiera. Se borran tambien sus comentarios. */
+    /**
+     * El autor elimina su tema; MODERADOR y ADMIN pueden eliminar cualquiera. Se borran tambien sus comentarios.
+     * Si el tema está baneado, el autor recibe 404 igual que al consultarlo.
+     */
     @Transactional
     public void eliminar(Long id, UsuarioActual actual) {
-        Tema tema = buscarEntidad(id);
+        // Un tema baneado no existe para su autor: solo MODERADOR o ADMIN lo pueden eliminar
+        Tema tema = buscarVisible(id, actual);
         if (!actual.esElMismo(tema.getUsuarioId()) && !actual.puedeModerar()) {
             throw ApiException.prohibido("Solo el autor, un moderador o un administrador pueden eliminar el tema");
         }

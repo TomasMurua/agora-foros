@@ -27,6 +27,7 @@ x-entorno: &entorno
   CORS_ORIGENES: https://${DOMINIO}
   SERVER_FORWARD_HEADERS_STRATEGY: framework
   LOG_NIVEL: INFO
+  TZ: America/Santiago
   JAVA_OPTS: -XX:MaxRAMPercentage=70 -XX:+UseSerialGC -Xss512k
 
 services:
@@ -35,6 +36,7 @@ services:
     restart: unless-stopped
     environment:
       ORACLE_PASSWORD: ${ORACLE_PASSWORD:?Defina ORACLE_PASSWORD en deploy/.env}
+      TZ: America/Santiago
     volumes:
       - oracle-datos:/opt/oracle/oradata
       - ../bd:/opt/agora/bd:ro
@@ -52,7 +54,7 @@ services:
     environment:
       <<: *entorno
       DB_USER: ${DB_USER_USUARIOS:-USUARIOS_MS}
-      DB_PASSWORD: ${DB_PASSWORD_USUARIOS:-Usuarios_Ms2026}
+      DB_PASSWORD: ${DB_PASSWORD_USUARIOS:-AgoraUsr#2026}
     volumes:
       - ./wallet:/wallet:ro
 
@@ -62,7 +64,7 @@ services:
     environment:
       <<: *entorno
       DB_USER: ${DB_USER_FORO:-FORO_MS}
-      DB_PASSWORD: ${DB_PASSWORD_FORO:-Foro_Ms2026}
+      DB_PASSWORD: ${DB_PASSWORD_FORO:-AgoraForo#2026}
     volumes:
       - ./wallet:/wallet:ro
 
@@ -72,7 +74,7 @@ services:
     environment:
       <<: *entorno
       DB_USER: ${DB_USER_MODERACION:-MODERACION_MS}
-      DB_PASSWORD: ${DB_PASSWORD_MODERACION:-Moderacion_Ms2026}
+      DB_PASSWORD: ${DB_PASSWORD_MODERACION:-AgoraMod#2026}
       FORO_URL: http://ms-foro:8082
       FORO_URL_PUBLICA: https://${DOMINIO}
     volumes:

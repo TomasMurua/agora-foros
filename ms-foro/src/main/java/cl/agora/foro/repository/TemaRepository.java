@@ -1,6 +1,5 @@
 package cl.agora.foro.repository;
 
-import cl.agora.foro.model.EstadoTema;
 import cl.agora.foro.model.Tema;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
@@ -15,21 +14,23 @@ public interface TemaRepository extends JpaRepository<Tema, Long> {
     /**
      * Busqueda de temas con filtros opcionales: texto en el titulo o el contenido,
      * categoria, autor y estado. Los mas recientes primero.
+     * Es SQL nativo porque CONTENIDO es un CLOB: Oracle lo busca con DBMS_LOB.INSTR.
+     * El estado llega como texto (ABIERTO, CERRADO o BANEADO).
      */
-    @Query("""
-            select t from Tema t
-            where (:categoriaId is null or t.categoria.id = :categoriaId)
-              and (:autor is null or lower(t.autor) = lower(:autor))
-              and (:estado is null or t.estado = :estado)
-              and (:texto is null
-                   or lower(t.titulo) like lower(concat('%', :texto, '%'))
-                   or lower(t.contenido) like lower(concat('%', :texto, '%')))
-            order by t.fechaCreacion desc
-            """)
+    @Query(value = """
+            SELECT t.* FROM TEMAS t
+            WHERE (:categoriaId IS NULL OR t.CATEGORIA_ID = :categoriaId)
+              AND (:autor IS NULL OR LOWER(t.AUTOR) = LOWER(:autor))
+              AND (:estado IS NULL OR t.ESTADO = :estado)
+              AND (:texto IS NULL
+                   OR LOWER(t.TITULO) LIKE '%' || LOWER(:texto) || '%'
+                   OR DBMS_LOB.INSTR(LOWER(t.CONTENIDO), LOWER(:texto)) > 0)
+            ORDER BY t.FECHA_CREACION DESC
+            """, nativeQuery = true)
     List<Tema> buscar(@Param("texto") String texto,
                       @Param("categoriaId") Long categoriaId,
                       @Param("autor") String autor,
-                      @Param("estado") EstadoTema estado);
+                      @Param("estado") String estado);
 
     List<Tema> findByCategoriaIdOrderByFechaCreacionDesc(Long categoriaId);
 

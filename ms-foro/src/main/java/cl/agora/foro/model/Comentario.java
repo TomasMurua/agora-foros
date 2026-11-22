@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
@@ -37,7 +38,8 @@ public class Comentario {
     @Column(name = "AUTOR", nullable = false, length = 30)
     private String autor;
 
-    @Column(name = "CONTENIDO", nullable = false, length = 2000)
+    @Lob
+    @Column(name = "CONTENIDO", nullable = false)
     private String contenido;
 
     /** Lo marca ms-moderacion cuando el comentario no cumple una norma del foro. */
