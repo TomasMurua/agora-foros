@@ -160,6 +160,16 @@ class BaneoServiceTest {
         assertThat(comentarioService.cambiarBaneo(3L, true, moderador).baneado()).isTrue();
     }
 
+    @Test
+    void elAutorNoPuedeEliminarSuTemaBaneado() {
+        when(temaRepository.findById(7L)).thenReturn(Optional.of(tema(7L, matias, EstadoTema.BANEADO)));
+
+        assertThatThrownBy(() -> temaService.eliminar(7L, matias))
+                .isInstanceOf(ApiException.class)
+                .extracting("status").isEqualTo(HttpStatus.NOT_FOUND);
+        verify(temaRepository, never()).delete(any());
+    }
+
     private static Tema tema(Long id, UsuarioActual autor, EstadoTema estado) {
         Categoria c = new Categoria();
         c.setId(1L);

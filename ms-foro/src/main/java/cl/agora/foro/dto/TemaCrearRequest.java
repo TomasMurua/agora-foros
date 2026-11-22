@@ -15,6 +15,6 @@ public record TemaCrearRequest(
         String titulo,
 
         @NotBlank(message = "El contenido es obligatorio")
-        @Size(min = 10, max = 4000, message = "El contenido debe tener entre 10 y 4000 caracteres")
+        @Size(min = 20, max = 4000, message = "El contenido debe tener entre 20 y 4000 caracteres")
         String contenido) {
 }

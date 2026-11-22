@@ -82,6 +82,9 @@ public class ComentarioService {
     @Transactional
     public void eliminar(Long id, UsuarioActual actual) {
         Comentario comentario = buscarEntidad(id);
+        if (comentario.estaBaneado() && !TemaService.puedeModerar(actual)) {
+            throw ApiException.noEncontrado("No existe el comentario con id " + id);
+        }
         if (!actual.esElMismo(comentario.getUsuarioId()) && !actual.puedeModerar()) {
             throw ApiException.prohibido("Solo el autor, un moderador o un administrador pueden eliminar el comentario");
         }

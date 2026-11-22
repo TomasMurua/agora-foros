@@ -19,6 +19,9 @@ import cl.agora.usuarios.security.UsuarioActual;
 import cl.agora.usuarios.service.RolService;
 import cl.agora.usuarios.service.UsuarioService;
 import java.util.Optional;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -107,6 +110,33 @@ class UsuarioServiceTest {
                 .isInstanceOf(ApiException.class)
                 .extracting("status").isEqualTo(HttpStatus.FORBIDDEN);
         verify(usuarioRepository, never()).delete(any());
+    }
+
+    @Test
+    void laContrasenaNoPuedeContenerElNombreDeUsuario() {
+        UsuarioCrearRequest req = new UsuarioCrearRequest("camila.diaz", "nueva@correo.cl", "Camila.Diaz2026!", "Camila Díaz", null);
+
+        assertThatThrownBy(() -> service.crear(req, null))
+                .isInstanceOf(ApiException.class)
+                .extracting("status").isEqualTo(HttpStatus.BAD_REQUEST);
+        verify(usuarioRepository, never()).save(any());
+    }
+
+    @Test
+    void lasReglasDeLaContrasenaSonLasMismasDelFrontend() {
+        try (ValidatorFactory fabrica = Validation.buildDefaultValidatorFactory()) {
+            Validator validador = fabrica.getValidator();
+            for (String debil : new String[] {"abcdefg1", "SinNumero!", "sin.mayuscula1", "SINMINUSCULA1!", "Con Espacio1!", "Ab1!", "Abcdefghijklmnopqr1!x"}) {
+                assertThat(validador.validateProperty(
+                        new UsuarioCrearRequest("nuevo", "n@correo.cl", debil, "Nuevo Usuario", null), "password"))
+                        .as(debil).isNotEmpty();
+            }
+            assertThat(validador.validateProperty(
+                    new UsuarioCrearRequest("nuevo", "n@correo.cl", "Clave2026!", "Nuevo Usuario", null), "password")).isEmpty();
+            assertThat(validador.validateProperty(
+                    new UsuarioCrearRequest("Nuevo-User", "n@correo.cl", "Clave2026!", "Nuevo Usuario", null), "nombreUsuario"))
+                    .isNotEmpty();
+        }
     }
 
     private static Rol rol(Long id, String nombre) {

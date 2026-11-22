@@ -129,6 +129,19 @@ class ReporteServiceTest {
         verify(reporteRepository).delete(reporte);
     }
 
+    @Test
+    void nadiePuedeReportarSuPropioContenido() {
+        when(normaRepository.findById(1L)).thenReturn(Optional.of(norma()));
+        when(foroClient.obtener(TipoContenido.TEMA, 1L, "Bearer t"))
+                .thenReturn(new ContenidoForo(TipoContenido.TEMA, 1L, "camila.diaz", "Spring Boot o Quarkus", false));
+
+        assertThatThrownBy(() -> reporteService.crear(
+                new ReporteCrearRequest(TipoContenido.TEMA, 1L, 1L, "Me reporto a mí misma por error"), camila, "Bearer t"))
+                .isInstanceOf(ApiException.class)
+                .extracting("status").isEqualTo(HttpStatus.BAD_REQUEST);
+        verify(reporteRepository, never()).save(any());
+    }
+
     private static Norma norma() {
         Norma n = new Norma();
         n.setId(1L);

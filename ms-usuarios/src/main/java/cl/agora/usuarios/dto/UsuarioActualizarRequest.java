@@ -10,11 +10,13 @@ public record UsuarioActualizarRequest(
         @Size(max = 120, message = "El correo no puede superar 120 caracteres")
         String correo,
 
-        @Size(min = 8, max = 60, message = "La contraseña debe tener entre 8 y 60 caracteres")
-        @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d).+$", message = "La contraseña debe tener al menos una letra y un número")
+        @Size(min = 8, max = 20, message = "La contraseña debe tener entre 8 y 20 caracteres")
+        @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9\\s])\\S+$",
+                message = "La contraseña debe tener mayúscula, minúscula, número y carácter especial, y no puede tener espacios")
         String password,
 
-        @Size(min = 1, max = 100, message = "El nombre completo debe tener entre 1 y 100 caracteres")
+        @Size(min = 2, max = 60, message = "El nombre completo debe tener entre 2 y 60 caracteres")
+        @Pattern(regexp = "^[\\p{L} ]+$", message = "El nombre completo solo admite letras y espacios")
         String nombreCompleto,
 
         /** Solo ADMIN. */

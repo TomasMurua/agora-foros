@@ -1,10 +1,13 @@
 package cl.agora.moderacion.exception;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +44,29 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> manejarJsonInvalido(HttpMessageNotReadableException ex, HttpServletRequest req) {
+        // JSON bien formado pero con un valor que no calza con el tipo, por ejemplo un estado que no existe
+        if (ex.getCause() instanceof InvalidFormatException formato && !formato.getPath().isEmpty()) {
+            String campo = formato.getPath().get(formato.getPath().size() - 1).getFieldName();
+            String mensaje = "El campo '" + campo + "' tiene un valor inválido";
+            Class<?> tipo = formato.getTargetType();
+            if (tipo != null && tipo.isEnum()) {
+                mensaje += ". Valores permitidos: " + Arrays.toString(tipo.getEnumConstants());
+            }
+            return responder(HttpStatus.BAD_REQUEST, mensaje, req);
+        }
         return responder(HttpStatus.BAD_REQUEST, "El cuerpo de la solicitud no es un JSON válido", req);
+    }
+
+    /** ORA-12899: un texto no cabe en la columna. Responde 400 en vez de un error interno. */
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<ErrorResponse> manejarBaseDeDatos(DataAccessException ex, HttpServletRequest req) {
+        String causa = String.valueOf(ex.getMostSpecificCause().getMessage());
+        if (causa.contains("ORA-12899")) {
+            log.warn("Texto demasiado largo en {}: {}", req.getRequestURI(), causa);
+            return responder(HttpStatus.BAD_REQUEST, "Uno de los textos es demasiado largo para guardarse", req);
+        }
+        log.error("Error de base de datos en {} {}", req.getMethod(), req.getRequestURI(), ex);
+        return responder(HttpStatus.INTERNAL_SERVER_ERROR, "Ocurrió un error al acceder a la base de datos", req);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
