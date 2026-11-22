@@ -34,7 +34,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/roles", "/api/roles/**").permitAll()
-                        .requestMatchers("/actuator/health", "/actuator/info", "/error").permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info", "/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/usuarios").hasAnyRole("ADMIN", "MODERADOR")
                         .requestMatchers("/api/roles", "/api/roles/**").hasRole("ADMIN")
                         .anyRequest().authenticated())

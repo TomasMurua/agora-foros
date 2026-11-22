@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Busqueda y visualizacion del foro: publicas
                         .requestMatchers(HttpMethod.GET, "/api/categorias/**", "/api/temas/**", "/api/comentarios/**").permitAll()
-                        .requestMatchers("/actuator/health", "/actuator/info", "/error").permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info", "/error").permitAll()
                         // Banear o restaurar contenido: lo ordena ms-moderacion con el token de un MODERADOR o ADMIN
                         .requestMatchers(HttpMethod.PUT, "/api/temas/*/baneo", "/api/comentarios/*/baneo")
                         .hasAnyRole("MODERADOR", "ADMIN")
