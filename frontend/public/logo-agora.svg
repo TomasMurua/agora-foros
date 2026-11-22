@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Ágora Foros">
+  <title>Ágora Foros</title>
+  <path d="M11 5h42a9 9 0 0 1 9 9v29a9 9 0 0 1-9 9H29L16 62V52h-5a9 9 0 0 1-9-9V14a9 9 0 0 1 9-9z" fill="#b4472a"/>
+  <path d="M32 12.5 51 22H13z" fill="#fbf7f0"/>
+  <circle cx="32" cy="18.2" r="2.1" fill="#d99a2b"/>
+  <rect x="14" y="24" width="36" height="3.2" rx="1.2" fill="#fbf7f0"/>
+  <rect x="17.5" y="29.2" width="5.4" height="12.6" rx="1.4" fill="#fbf7f0"/>
+  <rect x="29.3" y="29.2" width="5.4" height="12.6" rx="1.4" fill="#fbf7f0"/>
+  <rect x="41.1" y="29.2" width="5.4" height="12.6" rx="1.4" fill="#fbf7f0"/>
+  <rect x="13" y="43.6" width="38" height="3.4" rx="1.2" fill="#fbf7f0"/>
+</svg>
