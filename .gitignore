@@ -6,3 +6,6 @@ target/
 .DS_Store
 .env
 Wallet_*/
+deploy/.env
+deploy/wallet/
+node_modules/
