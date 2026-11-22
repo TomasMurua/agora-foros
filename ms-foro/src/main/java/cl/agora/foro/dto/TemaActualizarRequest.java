@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 /**
  * Campos opcionales. Titulo, contenido y categoria solo los cambia el autor.
  * El estado (ABIERTO / CERRADO) lo puede cambiar el autor, un MODERADOR o un ADMIN.
+ * El baneo no se cambia aqui: lo ordena ms-moderacion con PUT /api/temas/{id}/baneo.
  */
 public record TemaActualizarRequest(
         @Positive(message = "El id de la categoría debe ser positivo")

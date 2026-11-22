@@ -15,6 +15,9 @@ public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
 
     long countByTemaId(Long temaId);
 
+    @Query("select count(c) from Comentario c where c.tema.id = :temaId and c.baneado = :baneado")
+    long contarPorTemaYBaneo(@Param("temaId") Long temaId, @Param("baneado") Boolean baneado);
+
     @Modifying
     @Query("delete from Comentario c where c.tema.id = :temaId")
     int eliminarPorTema(@Param("temaId") Long temaId);

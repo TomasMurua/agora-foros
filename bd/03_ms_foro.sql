@@ -1,6 +1,7 @@
 -- =====================================================================
 -- Agora Foros - Script 03: tablas y datos del microservicio ms-foro
 -- Esquema: FORO_MS
+-- ESTADO = 'BANEADO' y COMENTARIOS.BANEADO = 1 los marca ms-moderacion.
 -- USUARIO_ID guarda el id del usuario en ms-usuarios. No hay llave foranea
 -- entre esquemas porque cada microservicio es dueño de sus datos.
 -- =====================================================================
@@ -28,7 +29,7 @@ CREATE TABLE FORO_MS.TEMAS (
   FECHA_ACTUALIZACION  TIMESTAMP,
   CONSTRAINT PK_TEMAS PRIMARY KEY (ID),
   CONSTRAINT FK_TEMAS_CATEGORIA FOREIGN KEY (CATEGORIA_ID) REFERENCES FORO_MS.CATEGORIAS (ID),
-  CONSTRAINT CK_TEMAS_ESTADO CHECK (ESTADO IN ('ABIERTO', 'CERRADO'))
+  CONSTRAINT CK_TEMAS_ESTADO CHECK (ESTADO IN ('ABIERTO', 'CERRADO', 'BANEADO'))
 );
 
 CREATE TABLE FORO_MS.COMENTARIOS (
@@ -37,9 +38,11 @@ CREATE TABLE FORO_MS.COMENTARIOS (
   USUARIO_ID           NUMBER         NOT NULL,
   AUTOR                VARCHAR2(30)   NOT NULL,
   CONTENIDO            VARCHAR2(2000) NOT NULL,
+  BANEADO              NUMBER(1)      DEFAULT 0 NOT NULL,
   FECHA_CREACION       TIMESTAMP      DEFAULT SYSTIMESTAMP NOT NULL,
   FECHA_ACTUALIZACION  TIMESTAMP,
   CONSTRAINT PK_COMENTARIOS PRIMARY KEY (ID),
+  CONSTRAINT CK_COMENTARIOS_BANEADO CHECK (BANEADO IN (0, 1)),
   CONSTRAINT FK_COMENTARIOS_TEMA FOREIGN KEY (TEMA_ID) REFERENCES FORO_MS.TEMAS (ID) ON DELETE CASCADE
 );
 
@@ -84,6 +87,11 @@ INSERT INTO FORO_MS.TEMAS (CATEGORIA_ID, USUARIO_ID, AUTOR, TITULO, CONTENIDO, E
 VALUES (1, 2, 'moderador', 'Normas de la categoría Tecnología',
         'Antes de publicar, busca si tu pregunta ya fue respondida. Comparte código con formato y no publiques datos personales ni claves.',
         'CERRADO', 64, TIMESTAMP '2026-10-20 12:00:00');
+-- Tema 7: publicidad, baneado por el administrador (ver MODERACION_MS.SANCIONES)
+INSERT INTO FORO_MS.TEMAS (CATEGORIA_ID, USUARIO_ID, AUTOR, TITULO, CONTENIDO, ESTADO, VISTAS, FECHA_CREACION)
+VALUES (2, 4, 'matias.soto', 'Vendo cuentas con skins a precio de remate',
+        'Tengo cuentas con todos los pases de temporada desbloqueados. Precios bajos solo esta semana, escríbanme por mensaje privado y les paso el link de pago.',
+        'BANEADO', 5, TIMESTAMP '2026-10-30 23:10:00');
 
 -- Comentarios
 INSERT INTO FORO_MS.COMENTARIOS (TEMA_ID, USUARIO_ID, AUTOR, CONTENIDO, FECHA_CREACION)
