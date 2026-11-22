@@ -1,0 +1,89 @@
+<section class="cabecera-pagina">
+  <div class="container">
+    <p class="eyebrow">Explorar</p>
+    <h1 class="titulo-pagina">Busca entre todos los temas</h1>
+    <p class="bajada-pagina">Filtra por texto, categoría, autor o estado. Los resultados se actualizan mientras escribes.</p>
+  </div>
+</section>
+
+<div class="container pb-5">
+  <div class="row g-4">
+    <aside class="col-12 col-lg-4 col-xl-3">
+      <form class="panel filtros" [formGroup]="filtros" novalidate aria-label="Filtros de búsqueda">
+        <h2 class="h6 text-uppercase texto-suave mb-3">Filtros</h2>
+        <div class="mb-3">
+          <label for="f-texto" class="form-label">Texto</label>
+          <input id="f-texto" type="search" class="form-control" formControlName="texto" maxlength="100"
+            placeholder="Palabras del título o contenido" [class.is-invalid]="filtros.controls.texto.invalid" />
+          <app-campo-error [control]="filtros.controls.texto" [enviado]="true" />
+        </div>
+        <div class="mb-3">
+          <label for="f-categoria" class="form-label">Categoría</label>
+          <select id="f-categoria" class="form-select" formControlName="categoriaId">
+            <option [ngValue]="null">Todas</option>
+            @for (c of foro.categorias(); track c.id) {
+              <option [ngValue]="c.id">{{ c.nombre }}</option>
+            }
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="f-autor" class="form-label">Autor</label>
+          <input id="f-autor" type="text" class="form-control" formControlName="autor" maxlength="30" list="lista-autores"
+            placeholder="Nombre de usuario" [class.is-invalid]="filtros.controls.autor.invalid" />
+          <datalist id="lista-autores">
+            @for (a of foro.autores(); track a) {
+              <option [value]="a"></option>
+            }
+          </datalist>
+          <app-campo-error [control]="filtros.controls.autor" [enviado]="true" />
+        </div>
+        <div class="mb-3">
+          <label for="f-estado" class="form-label">Estado</label>
+          <select id="f-estado" class="form-select" formControlName="estado">
+            <option value="">Todos</option>
+            <option value="ABIERTO">Abiertos</option>
+            <option value="CERRADO">Cerrados</option>
+            @if (auth.esModerador()) {
+              <option value="BANEADO">Baneados</option>
+            }
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="f-orden" class="form-label">Ordenar por</label>
+          <select id="f-orden" class="form-select" formControlName="orden">
+            <option value="recientes">Más recientes</option>
+            <option value="populares">Más vistos</option>
+            <option value="comentados">Más comentados</option>
+          </select>
+        </div>
+        <button type="button" class="btn btn-outline-secondary w-100" (click)="limpiar()" [disabled]="!hayFiltros()">
+          <i class="bi bi-x-circle" aria-hidden="true"></i> Limpiar filtros
+        </button>
+      </form>
+    </aside>
+
+    <section class="col-12 col-lg-8 col-xl-9" aria-live="polite">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <p class="mb-0 texto-suave">
+          {{ resultados().length }} {{ resultados().length === 1 ? 'tema encontrado' : 'temas encontrados' }}
+        </p>
+        @if (auth.estaAutenticado()) {
+          <a class="btn btn-primary btn-sm" routerLink="/temas/nuevo"><i class="bi bi-plus-lg" aria-hidden="true"></i> Publicar tema</a>
+        }
+      </div>
+      @if (resultados().length) {
+        <div class="row g-3">
+          @for (r of resultados(); track r.tema.id) {
+            <div class="col-12 col-xl-6">
+              <app-tema-card [resumen]="r" />
+            </div>
+          }
+        </div>
+      } @else {
+        <app-estado-vacio titulo="No encontramos temas" texto="Prueba con otras palabras o quita algún filtro.">
+          <button type="button" class="btn btn-outline-primary" (click)="limpiar()">Ver todos los temas</button>
+        </app-estado-vacio>
+      }
+    </section>
+  </div>
+</div>
