@@ -1,3 +1,7 @@
+# Ágora Foros en un solo equipo: Oracle, los tres microservicios y el frontend.
+#   docker compose up -d oracle     -> solo la base de datos (para correr los servicios con ./mvnw)
+#   docker compose up -d --build    -> todo con Docker
+# Frontend: http://localhost:8080  ms-usuarios: 8081  ms-foro: 8082  ms-moderacion: 8083
 services:
   oracle:
     image: gvenzl/oracle-free:23-slim-faststart
@@ -15,3 +19,51 @@ services:
       timeout: 5s
       retries: 20
       start_period: 20s
+
+  ms-usuarios:
+    build: ./ms-usuarios
+    image: agora-foros/ms-usuarios:2.0.0
+    container_name: agora-ms-usuarios
+    depends_on:
+      oracle:
+        condition: service_healthy
+    environment: &comun
+      DB_URL: jdbc:oracle:thin:@//oracle:1521/FREEPDB1
+      JWT_SECRET: ${JWT_SECRET:-agora-foros-clave-local-de-desarrollo-2026-cambiar}
+      CORS_ORIGENES: http://localhost:8080,http://localhost:4200
+      LOG_NIVEL: INFO
+    ports:
+      - "8081:8081"
+
+  ms-foro:
+    build: ./ms-foro
+    image: agora-foros/ms-foro:2.0.0
+    container_name: agora-ms-foro
+    depends_on:
+      oracle:
+        condition: service_healthy
+    environment:
+      <<: *comun
+    ports:
+      - "8082:8082"
+
+  ms-moderacion:
+    build: ./ms-moderacion
+    image: agora-foros/ms-moderacion:2.0.0
+    container_name: agora-ms-moderacion
+    depends_on:
+      oracle:
+        condition: service_healthy
+    environment:
+      <<: *comun
+      FORO_URL: http://ms-foro:8082
+      FORO_URL_PUBLICA: http://localhost:8082
+    ports:
+      - "8083:8083"
+
+  frontend:
+    build: ./frontend
+    image: agora-foros/frontend:2.0.0
+    container_name: agora-frontend
+    ports:
+      - "8080:80"
