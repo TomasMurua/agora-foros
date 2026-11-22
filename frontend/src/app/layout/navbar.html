@@ -1,0 +1,93 @@
+<nav class="navbar navbar-expand-xl barra" aria-label="Navegación principal">
+  <div class="container">
+    <a class="navbar-brand marca" routerLink="/" aria-label="Ágora Foros, ir al inicio">
+      <img src="logo-agora.svg" alt="" width="40" height="40" />
+      <span class="marca-texto"><span class="marca-agora">Ágora</span><span class="marca-foros">Foros</span></span>
+    </a>
+
+    <button class="navbar-toggler" type="button" aria-controls="menu-principal"
+      [attr.aria-expanded]="menuAbierto()" aria-label="Abrir o cerrar el menú"
+      (click)="menuAbierto.set(!menuAbierto())">
+      <i class="bi" [class.bi-list]="!menuAbierto()" [class.bi-x-lg]="menuAbierto()" aria-hidden="true"></i>
+    </button>
+
+    <div class="collapse navbar-collapse" id="menu-principal" [class.show]="menuAbierto()">
+      <ul class="navbar-nav me-auto mb-2 mb-xl-0">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Inicio</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/explorar" routerLinkActive="active">Explorar</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/normas" routerLinkActive="active">Normas</a>
+        </li>
+        @if (auth.esModerador()) {
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/moderacion" routerLinkActive="active">
+              Moderación
+              @if (moderacion.cantidadPendientes() > 0) {
+                <span class="badge rounded-pill badge-pendientes">{{ moderacion.cantidadPendientes() }}<span class="visually-hidden"> reportes pendientes</span></span>
+              }
+            </a>
+          </li>
+        }
+        @if (auth.esAdmin()) {
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/admin" routerLinkActive="active">Administración</a>
+          </li>
+        }
+      </ul>
+
+      <form class="buscador my-2 my-xl-0 me-xl-3" role="search" [formGroup]="formBusqueda" (ngSubmit)="buscar()" novalidate>
+        <label for="busqueda-rapida" class="visually-hidden">Buscar temas</label>
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <input id="busqueda-rapida" type="search" class="form-control" placeholder="Buscar"
+          [formControl]="busqueda" maxlength="100" />
+      </form>
+
+      @if (auth.usuarioActual(); as usuario) {
+        <div class="d-flex flex-column flex-xl-row gap-2 align-items-xl-center">
+          <a class="btn btn-primary btn-sm px-3" routerLink="/temas/nuevo">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i> Publicar
+          </a>
+          <div class="menu-cuenta position-relative">
+            <button type="button" class="btn btn-cuenta" [attr.aria-expanded]="cuentaAbierta()" aria-haspopup="true" (click)="alternarCuenta($event)">
+              <app-avatar [nombre]="usuario.nombreCompleto" [color]="usuario.colorAvatar" tamano="sm" />
+              <span class="text-start lh-sm">
+                <span class="d-block fw-semibold">{{ usuario.nombreUsuario }}</span>
+                <span class="d-block small texto-rol">{{ etiquetaRol[usuario.rol] }}</span>
+              </span>
+              <i class="bi bi-chevron-down small" aria-hidden="true"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" [class.show]="cuentaAbierta()">
+              <li><a class="dropdown-item" routerLink="/perfil"><i class="bi bi-person-circle" aria-hidden="true"></i> Mi perfil</a></li>
+              <li><a class="dropdown-item" routerLink="/mis-temas"><i class="bi bi-journal-text" aria-hidden="true"></i> Mis temas</a></li>
+              <li><a class="dropdown-item" routerLink="/perfil/editar"><i class="bi bi-sliders" aria-hidden="true"></i> Modificar perfil</a></li>
+              @if (auth.esModerador()) {
+                <li><hr class="dropdown-divider" /></li>
+                <li><h3 class="dropdown-header">Moderación</h3></li>
+                <li><a class="dropdown-item" routerLink="/moderacion"><i class="bi bi-shield-check" aria-hidden="true"></i> Panel de moderación</a></li>
+              }
+              @if (auth.esAdmin()) {
+                <li><hr class="dropdown-divider" /></li>
+                <li><h3 class="dropdown-header">Administración</h3></li>
+                <li><a class="dropdown-item" routerLink="/admin/usuarios"><i class="bi bi-people" aria-hidden="true"></i> Usuarios</a></li>
+                <li><a class="dropdown-item" routerLink="/admin/categorias"><i class="bi bi-grid" aria-hidden="true"></i> Categorías</a></li>
+                <li><a class="dropdown-item" routerLink="/admin/normas"><i class="bi bi-journal-check" aria-hidden="true"></i> Normas del foro</a></li>
+                <li><a class="dropdown-item" routerLink="/admin/sanciones"><i class="bi bi-clock-history" aria-hidden="true"></i> Historial de sanciones</a></li>
+              }
+              <li><hr class="dropdown-divider" /></li>
+              <li><button type="button" class="dropdown-item text-danger" (click)="cerrarSesion()"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Cerrar sesión</button></li>
+            </ul>
+          </div>
+        </div>
+      } @else {
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-primary btn-sm px-3" routerLink="/iniciar-sesion">Iniciar sesión</a>
+          <a class="btn btn-primary btn-sm px-3" routerLink="/registro">Crear cuenta</a>
+        </div>
+      }
+    </div>
+  </div>
+</nav>

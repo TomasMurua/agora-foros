@@ -1,0 +1,88 @@
+<section class="hero">
+  <div class="container">
+    <div class="row align-items-center g-4 g-lg-5">
+      <div class="col-12 col-md-7 col-lg-6">
+        <p class="eyebrow">Foro en línea · Comunidad abierta</p>
+        <h1 class="hero-titulo">La plaza donde las <em>buenas preguntas</em> encuentran respuesta.</h1>
+        <p class="hero-bajada">
+          En Ágora Foros conversas de tecnología, videojuegos, cine, deporte y música con personas que saben y
+          quieren ayudar. Publica un tema, comenta y sigue las discusiones que te interesan.
+        </p>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          @if (auth.estaAutenticado()) {
+            <a class="btn btn-primary btn-lg" routerLink="/temas/nuevo"><i class="bi bi-pencil-square" aria-hidden="true"></i> Publicar un tema</a>
+          } @else {
+            <a class="btn btn-primary btn-lg" routerLink="/registro">Crear mi cuenta</a>
+          }
+          <a class="btn btn-outline-primary btn-lg" routerLink="/explorar">Explorar temas</a>
+        </div>
+        <dl class="hero-cifras">
+          <div><dt>Temas</dt><dd>{{ foro.estadisticas().temas }}</dd></div>
+          <div><dt>Comentarios</dt><dd>{{ foro.estadisticas().comentarios }}</dd></div>
+          <div><dt>Categorías</dt><dd>{{ foro.estadisticas().categorias }}</dd></div>
+        </dl>
+      </div>
+      <div class="col-12 col-md-5 col-lg-6 text-center">
+        <img class="hero-ilustracion" src="ilustraciones/hero-agora.svg" alt="Ilustración de una plaza con columnas y globos de conversación" width="560" height="440" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seccion">
+  <div class="container">
+    <div class="seccion-cabecera">
+      <div>
+        <p class="eyebrow">Categorías</p>
+        <h2 class="seccion-titulo">Elige de qué quieres conversar</h2>
+      </div>
+      <a class="enlace-flecha" routerLink="/explorar">Ver todos los temas <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+    </div>
+    <div class="row g-3">
+      @for (categoria of foro.categorias(); track categoria.id; let i = $index) {
+        <div class="col-12 col-md-6 col-lg-4">
+          <app-categoria-card [categoria]="categoria" [temas]="foro.temasEnCategoria(categoria.id)" [tono]="tono(i)" />
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="seccion seccion-alterna">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-12 col-lg-8">
+        <div class="seccion-cabecera">
+          <div>
+            <p class="eyebrow">Lo más visto</p>
+            <h2 class="seccion-titulo">Temas populares</h2>
+          </div>
+        </div>
+        <div class="row g-3">
+          @for (resumen of foro.temasPopulares(); track resumen.tema.id) {
+            <div class="col-12 col-md-6">
+              <app-tema-card [resumen]="resumen" />
+            </div>
+          }
+        </div>
+      </div>
+      <aside class="col-12 col-lg-4">
+        <div class="panel h-100">
+          <h2 class="h5 mb-3"><i class="bi bi-lightning-charge text-acento" aria-hidden="true"></i> Recién publicados</h2>
+          <ol class="lista-recientes">
+            @for (resumen of foro.temasRecientes(); track resumen.tema.id) {
+              <li>
+                <a [routerLink]="['/temas', resumen.tema.id]">{{ resumen.tema.titulo }}</a>
+                <span>{{ resumen.tema.autor }} · {{ resumen.categoria?.nombre }}</span>
+              </li>
+            }
+          </ol>
+          <div class="nota-normas mt-4">
+            <img src="ilustraciones/normas.svg" alt="" width="64" height="64" />
+            <p class="mb-0">Antes de publicar, revisa las <a routerLink="/normas">normas del foro</a>. Mantienen la conversación sana.</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>

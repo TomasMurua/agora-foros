@@ -1,0 +1,70 @@
+<section class="cabecera-pagina">
+  <div class="container">
+    <p class="eyebrow">{{ modoEdicion() ? 'Editar' : 'Nuevo tema' }}</p>
+    <h1 class="titulo-pagina">{{ modoEdicion() ? 'Edita tu tema' : 'Abre una conversación' }}</h1>
+    <p class="bajada-pagina">Un buen título y un contenido claro ayudan a que otras personas respondan rápido.</p>
+  </div>
+</section>
+
+<div class="container pb-5">
+  <div class="row g-4">
+    <div class="col-12 col-lg-8">
+      <form class="panel" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+        <div class="mb-3">
+          <label for="t-titulo" class="form-label">Título <span class="obligatorio" aria-hidden="true">*</span></label>
+          <input id="t-titulo" type="text" class="form-control" formControlName="titulo" required
+            [attr.minlength]="limitesTitulo.min" [attr.maxlength]="limitesTitulo.max"
+            placeholder="Por ejemplo: ¿Qué framework recomiendan para una API REST?"
+            [class.is-invalid]="invalido('titulo')" aria-describedby="t-titulo-ayuda" />
+          <div class="d-flex justify-content-between gap-2">
+            <app-campo-error [control]="form.controls.titulo" [enviado]="enviado()" />
+            <app-contador-caracteres class="ms-auto" id="t-titulo-ayuda" [control]="form.controls.titulo" [maximo]="limitesTitulo.max" [alerta]="20" />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="t-categoria" class="form-label">Categoría <span class="obligatorio" aria-hidden="true">*</span></label>
+          <select id="t-categoria" class="form-select" formControlName="categoriaId" required [class.is-invalid]="invalido('categoriaId')">
+            <option [ngValue]="null" disabled>Elige una categoría</option>
+            @for (c of foro.categorias(); track c.id) {
+              <option [ngValue]="c.id">{{ c.nombre }}</option>
+            }
+          </select>
+          <app-campo-error [control]="form.controls.categoriaId" [enviado]="enviado()" [mensajes]="{ required: 'Elige la categoría del tema.' }" />
+        </div>
+
+        <div class="mb-4">
+          <label for="t-contenido" class="form-label">Contenido <span class="obligatorio" aria-hidden="true">*</span></label>
+          <textarea id="t-contenido" class="form-control" rows="9" formControlName="contenido" required
+            [attr.minlength]="limitesContenido.min" [attr.maxlength]="limitesContenido.max"
+            placeholder="Cuenta el contexto, qué intentaste y qué necesitas saber."
+            [class.is-invalid]="invalido('contenido')"></textarea>
+          <div class="d-flex justify-content-between gap-2">
+            <app-campo-error [control]="form.controls.contenido" [enviado]="enviado()" />
+            <app-contador-caracteres class="ms-auto" [control]="form.controls.contenido" [maximo]="limitesContenido.max" [alerta]="200" />
+          </div>
+        </div>
+
+        <div class="d-flex flex-column-reverse flex-sm-row justify-content-end gap-2">
+          <a class="btn btn-outline-secondary" [routerLink]="modoEdicion() ? ['/temas', id()] : ['/explorar']">Cancelar</a>
+          <button type="submit" class="btn btn-primary" [disabled]="form.invalid && enviado()">
+            <i class="bi" [class.bi-send]="!modoEdicion()" [class.bi-check2]="modoEdicion()" aria-hidden="true"></i>
+            {{ modoEdicion() ? 'Guardar cambios' : 'Publicar tema' }}
+          </button>
+        </div>
+      </form>
+    </div>
+    <aside class="col-12 col-lg-4">
+      <div class="panel panel-consejos">
+        <img src="ilustraciones/escribir.svg" alt="" width="120" height="96" class="mb-3" />
+        <h2 class="h5">Consejos para publicar</h2>
+        <ul class="ps-3 mb-0">
+          <li>El título resume la pregunta en una línea (entre 5 y 150 caracteres).</li>
+          <li>Elige la categoría que mejor calza; así llega a quien sabe del tema.</li>
+          <li>En el contenido da contexto: al menos 20 caracteres.</li>
+          <li>No publiques datos personales, claves ni enlaces a contenido ilegal.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>

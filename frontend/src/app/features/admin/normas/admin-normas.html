@@ -1,0 +1,64 @@
+<div class="row g-4">
+  <div class="col-12 col-lg-5 col-xl-4">
+    <form class="panel" [formGroup]="form" (ngSubmit)="guardar()" novalidate aria-labelledby="titulo-form-norma">
+      <h2 id="titulo-form-norma" class="h5 mb-3">{{ editandoId() ? 'Editar norma' : 'Nueva norma' }}</h2>
+      <div class="mb-3">
+        <label for="an-titulo" class="form-label">Título</label>
+        <input id="an-titulo" type="text" class="form-control" formControlName="titulo" required
+          [attr.minlength]="limites.tituloNorma.min" [attr.maxlength]="limites.tituloNorma.max"
+          placeholder="Por ejemplo: Sin mensajes duplicados" [class.is-invalid]="invalido('titulo')" />
+        <app-campo-error [control]="form.controls.titulo" [enviado]="enviado()" [mensajes]="{ yaExiste: 'Ya existe una norma con ese título.' }" />
+      </div>
+      <div class="mb-3">
+        <label for="an-descripcion" class="form-label">Descripción</label>
+        <textarea id="an-descripcion" class="form-control" rows="4" formControlName="descripcion" required
+          [attr.minlength]="limites.descripcionNorma.min" [attr.maxlength]="limites.descripcionNorma.max"
+          [class.is-invalid]="invalido('descripcion')"></textarea>
+        <div class="d-flex justify-content-between gap-2">
+          <app-campo-error [control]="form.controls.descripcion" [enviado]="enviado()" />
+          <app-contador-caracteres class="ms-auto" [control]="form.controls.descripcion" [maximo]="limites.descripcionNorma.max" />
+        </div>
+      </div>
+      <fieldset class="mb-4">
+        <legend class="form-label fs-6">Gravedad</legend>
+        <div class="btn-group w-100" role="group">
+          @for (g of gravedades; track g) {
+            <input type="radio" class="btn-check" name="gravedad" formControlName="gravedad" [id]="'gravedad-' + g" [value]="g" />
+            <label class="btn btn-outline-secondary" [for]="'gravedad-' + g">{{ g === 'BAJA' ? 'Baja' : g === 'MEDIA' ? 'Media' : 'Alta' }}</label>
+          }
+        </div>
+      </fieldset>
+      <div class="d-flex gap-2">
+        @if (editandoId()) {
+          <button type="button" class="btn btn-outline-secondary" (click)="cancelar()">Cancelar</button>
+        }
+        <button type="submit" class="btn btn-primary flex-grow-1" [disabled]="form.invalid && enviado()">
+          {{ editandoId() ? 'Guardar cambios' : 'Crear norma' }}
+        </button>
+      </div>
+    </form>
+  </div>
+  <div class="col-12 col-lg-7 col-xl-8">
+    <div class="lista-filas">
+      @for (n of moderacion.normas(); track n.id) {
+        <div class="fila" [class.fila-activa]="editandoId() === n.id">
+          <div class="row g-2 align-items-center">
+            <div class="col-12 col-md-8">
+              <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                <span class="codigo-norma">{{ n.codigo }}</span>
+                <strong>{{ n.titulo }}</strong>
+                <span class="badge gravedad" [class]="'badge gravedad gravedad-' + n.gravedad.toLowerCase()">Gravedad {{ n.gravedad.toLowerCase() }}</span>
+              </div>
+              <div class="small texto-suave">{{ n.descripcion }}</div>
+              <div class="small texto-suave">Citada en {{ admin.usosDeNorma(n.id) }} reporte(s) o sanción(es)</div>
+            </div>
+            <div class="col-12 col-md-4 d-flex gap-1 justify-content-md-end">
+              <button type="button" class="btn btn-sm btn-outline-primary" (click)="editar(n)"><i class="bi bi-pencil" aria-hidden="true"></i> Editar</button>
+              <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminar(n)" [attr.aria-label]="'Eliminar ' + n.codigo"><i class="bi bi-trash" aria-hidden="true"></i></button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
