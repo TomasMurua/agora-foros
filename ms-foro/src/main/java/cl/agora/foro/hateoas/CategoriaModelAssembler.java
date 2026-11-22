@@ -16,7 +16,7 @@ public class CategoriaModelAssembler implements RepresentationModelAssembler<Cat
     public EntityModel<CategoriaResponse> toModel(CategoriaResponse c) {
         return EntityModel.of(c,
                 linkTo(methodOn(CategoriaController.class).obtener(c.id())).withSelfRel(),
-                linkTo(methodOn(CategoriaController.class).temas(c.id())).withRel("temas"),
+                linkTo(methodOn(CategoriaController.class).temas(c.id(), null)).withRel("temas"),
                 linkTo(methodOn(CategoriaController.class).listar()).withRel("categorias"));
     }
 }
