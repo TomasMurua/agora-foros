@@ -12,4 +12,10 @@ public record RolRequest(
 
         @Size(max = 200, message = "La descripción no puede superar 200 caracteres")
         String descripcion) {
+
+    /** Quita los espacios del inicio y del final antes de validar los largos. */
+    public RolRequest {
+        nombre = Textos.limpiar(nombre);
+        descripcion = Textos.limpiar(descripcion);
+    }
 }

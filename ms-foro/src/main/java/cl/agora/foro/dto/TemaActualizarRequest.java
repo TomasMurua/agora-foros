@@ -20,4 +20,10 @@ public record TemaActualizarRequest(
         String contenido,
 
         EstadoTema estado) {
+
+    /** Quita los espacios del inicio y del final antes de validar los largos. */
+    public TemaActualizarRequest {
+        titulo = Textos.limpiar(titulo);
+        contenido = Textos.limpiar(contenido);
+    }
 }

@@ -27,7 +27,7 @@ export const LIMITES = {
   nombreCategoria: { min: 3, max: 60 },
   descripcion: { max: 300 },
   tituloNorma: { min: 5, max: 80 },
-  descripcionNorma: { min: 10, max: 300 },
+  descripcionNorma: { min: 10, max: 500 },
 } as const;
 
 /** Una regla de la contraseña, con su mensaje para la lista de verificación. */

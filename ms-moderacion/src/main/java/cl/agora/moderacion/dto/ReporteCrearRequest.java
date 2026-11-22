@@ -21,4 +21,9 @@ public record ReporteCrearRequest(
         @NotBlank(message = "El motivo es obligatorio")
         @Size(min = 10, max = 300, message = "El motivo debe tener entre 10 y 300 caracteres")
         String motivo) {
+
+    /** Quita los espacios del inicio y del final antes de validar los largos. */
+    public ReporteCrearRequest {
+        motivo = Textos.limpiar(motivo);
+    }
 }

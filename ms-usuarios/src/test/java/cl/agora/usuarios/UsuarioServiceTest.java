@@ -126,13 +126,18 @@ class UsuarioServiceTest {
     void lasReglasDeLaContrasenaSonLasMismasDelFrontend() {
         try (ValidatorFactory fabrica = Validation.buildDefaultValidatorFactory()) {
             Validator validador = fabrica.getValidator();
-            for (String debil : new String[] {"abcdefg1", "SinNumero!", "sin.mayuscula1", "SINMINUSCULA1!", "Con Espacio1!", "Ab1!", "Abcdefghijklmnopqr1!x"}) {
+            for (String debil : new String[] {"abcdefg1", "SinNumero!", "sin.mayuscula1", "SINMINUSCULA1!", "Con Espacio1!", "Ab1!", "Abcdefghijklmnopqr1!x", "Contraseñá2026"}) {
                 assertThat(validador.validateProperty(
                         new UsuarioCrearRequest("nuevo", "n@correo.cl", debil, "Nuevo Usuario", null), "password"))
                         .as(debil).isNotEmpty();
             }
             assertThat(validador.validateProperty(
                     new UsuarioCrearRequest("nuevo", "n@correo.cl", "Clave2026!", "Nuevo Usuario", null), "password")).isEmpty();
+            // Como en el frontend, una letra con tilde cuenta como letra y no como carácter especial
+            assertThat(validador.validateProperty(
+                    new UsuarioCrearRequest("nuevo", "n@correo.cl", "Ñandú2026!", "Nuevo Usuario", null), "password")).isEmpty();
+            assertThat(validador.validateProperty(
+                    new UsuarioCrearRequest("nuevo", "n@correo.cl", "Clave2026!", "   ", null), "nombreCompleto")).isNotEmpty();
             assertThat(validador.validateProperty(
                     new UsuarioCrearRequest("Nuevo-User", "n@correo.cl", "Clave2026!", "Nuevo Usuario", null), "nombreUsuario"))
                     .isNotEmpty();

@@ -31,4 +31,9 @@ public record SancionRequest(
 
         @Positive(message = "El id del reporte debe ser positivo")
         Long reporteId) {
+
+    /** Quita los espacios del inicio y del final antes de validar los largos. */
+    public SancionRequest {
+        motivo = Textos.limpiar(motivo);
+    }
 }

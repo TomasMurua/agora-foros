@@ -12,4 +12,9 @@ public record SancionActualizarRequest(
 
         @Positive(message = "El id de la norma debe ser positivo")
         Long normaId) {
+
+    /** Quita los espacios del inicio y del final antes de validar los largos. */
+    public SancionActualizarRequest {
+        motivo = Textos.limpiar(motivo);
+    }
 }

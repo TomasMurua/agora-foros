@@ -14,7 +14,8 @@ public interface TemaRepository extends JpaRepository<Tema, Long> {
     /**
      * Busqueda de temas con filtros opcionales: texto en el titulo o el contenido,
      * categoria, autor y estado. Los mas recientes primero.
-     * Es SQL nativo porque CONTENIDO es un CLOB: Oracle lo busca con DBMS_LOB.INSTR.
+     * Es SQL nativo porque CONTENIDO es un CLOB: Oracle lo busca con DBMS_LOB.INSTR. Se usa INSTR
+     * y no LIKE para que un % o un _ en el texto se busquen tal cual.
      * El estado llega como texto (ABIERTO, CERRADO o BANEADO).
      */
     @Query(value = """
@@ -23,7 +24,7 @@ public interface TemaRepository extends JpaRepository<Tema, Long> {
               AND (:autor IS NULL OR LOWER(t.AUTOR) = LOWER(:autor))
               AND (:estado IS NULL OR t.ESTADO = :estado)
               AND (:texto IS NULL
-                   OR LOWER(t.TITULO) LIKE '%' || LOWER(:texto) || '%'
+                   OR INSTR(LOWER(t.TITULO), LOWER(:texto)) > 0
                    OR DBMS_LOB.INSTR(LOWER(t.CONTENIDO), LOWER(:texto)) > 0)
             ORDER BY t.FECHA_CREACION DESC
             """, nativeQuery = true)

@@ -11,12 +11,12 @@ public record UsuarioActualizarRequest(
         String correo,
 
         @Size(min = 8, max = 20, message = "La contraseña debe tener entre 8 y 20 caracteres")
-        @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9\\s])\\S+$",
+        @Pattern(regexp = "^(?=.*[A-ZÁÉÍÓÚÑ])(?=.*[a-záéíóúñ])(?=.*\\d)(?=.*[^A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ\\s])\\S+$",
                 message = "La contraseña debe tener mayúscula, minúscula, número y carácter especial, y no puede tener espacios")
         String password,
 
         @Size(min = 2, max = 60, message = "El nombre completo debe tener entre 2 y 60 caracteres")
-        @Pattern(regexp = "^[\\p{L} ]+$", message = "El nombre completo solo admite letras y espacios")
+        @Pattern(regexp = "^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$", message = "El nombre completo solo admite letras y espacios")
         String nombreCompleto,
 
         /** Solo ADMIN. */
@@ -24,4 +24,10 @@ public record UsuarioActualizarRequest(
 
         /** Solo ADMIN. false bloquea la cuenta (no puede iniciar sesión). */
         Boolean activo) {
+
+    /** Quita los espacios del inicio y del final antes de validar los largos. */
+    public UsuarioActualizarRequest {
+        correo = Textos.limpiar(correo);
+        nombreCompleto = Textos.limpiar(nombreCompleto);
+    }
 }

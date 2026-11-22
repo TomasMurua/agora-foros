@@ -77,10 +77,10 @@ class BaneoServiceTest {
     void temaBaneadoResponde404AQuienNoModera() {
         when(temaRepository.findById(7L)).thenReturn(Optional.of(tema(7L, matias, EstadoTema.BANEADO)));
 
-        assertThatThrownBy(() -> temaService.visualizar(7L, camila))
+        assertThatThrownBy(() -> temaService.visualizar(7L, camila, true))
                 .isInstanceOf(ApiException.class)
                 .extracting("status").isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(temaService.visualizar(7L, moderador).estado()).isEqualTo(EstadoTema.BANEADO);
+        assertThat(temaService.visualizar(7L, moderador, true).estado()).isEqualTo(EstadoTema.BANEADO);
     }
 
     @Test
@@ -123,10 +123,27 @@ class BaneoServiceTest {
     void elAutorNoPuedeReabrirSuTemaBaneado() {
         when(temaRepository.findById(7L)).thenReturn(Optional.of(tema(7L, matias, EstadoTema.BANEADO)));
 
+        // Para el autor el tema baneado no existe, igual que al consultarlo o borrarlo
         assertThatThrownBy(() -> temaService.actualizar(7L,
                 new TemaActualizarRequest(null, null, null, EstadoTema.ABIERTO), matias))
                 .isInstanceOf(ApiException.class)
+                .extracting("status").isEqualTo(HttpStatus.NOT_FOUND);
+        // Un moderador sí lo ve, pero lo restaura desde ms-moderacion y no con este PUT
+        assertThatThrownBy(() -> temaService.actualizar(7L,
+                new TemaActualizarRequest(null, null, null, EstadoTema.ABIERTO), moderador))
+                .isInstanceOf(ApiException.class)
                 .extracting("status").isEqualTo(HttpStatus.CONFLICT);
+    }
+
+    @Test
+    void verUnTemaSinSumarVisita() {
+        Tema tema = tema(1L, camila, EstadoTema.ABIERTO);
+        when(temaRepository.findById(1L)).thenReturn(Optional.of(tema));
+
+        temaService.visualizar(1L, matias, false);
+        assertThat(tema.getVistas()).isZero();
+        temaService.visualizar(1L, matias, true);
+        assertThat(tema.getVistas()).isEqualTo(1L);
     }
 
     @Test
@@ -168,6 +185,16 @@ class BaneoServiceTest {
                 .isInstanceOf(ApiException.class)
                 .extracting("status").isEqualTo(HttpStatus.NOT_FOUND);
         verify(temaRepository, never()).delete(any());
+    }
+
+    @Test
+    void losEspaciosNoCuentanParaElLargoMinimo() {
+        try (jakarta.validation.ValidatorFactory fabrica = jakarta.validation.Validation.buildDefaultValidatorFactory()) {
+            cl.agora.foro.dto.TemaCrearRequest req =
+                    new cl.agora.foro.dto.TemaCrearRequest(1L, "     a      ", "a" + " ".repeat(30));
+            assertThat(req.titulo()).isEqualTo("a");
+            assertThat(fabrica.getValidator().validate(req)).hasSize(2);
+        }
     }
 
     private static Tema tema(Long id, UsuarioActual autor, EstadoTema estado) {

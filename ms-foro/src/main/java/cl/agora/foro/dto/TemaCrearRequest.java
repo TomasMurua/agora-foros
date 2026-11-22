@@ -17,4 +17,10 @@ public record TemaCrearRequest(
         @NotBlank(message = "El contenido es obligatorio")
         @Size(min = 20, max = 4000, message = "El contenido debe tener entre 20 y 4000 caracteres")
         String contenido) {
+
+    /** Quita los espacios del inicio y del final antes de validar los largos. */
+    public TemaCrearRequest {
+        titulo = Textos.limpiar(titulo);
+        contenido = Textos.limpiar(contenido);
+    }
 }

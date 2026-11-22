@@ -11,4 +11,9 @@ public record ReporteResolverRequest(
 
         @Size(max = 300, message = "La observación no puede superar los 300 caracteres")
         String observacion) {
+
+    /** Quita los espacios del inicio y del final antes de validar los largos. */
+    public ReporteResolverRequest {
+        observacion = Textos.limpiar(observacion);
+    }
 }

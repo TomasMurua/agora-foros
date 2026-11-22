@@ -60,9 +60,11 @@ public class TemaService {
 
     /** Visualizar un tema suma una visita. Un tema baneado no existe para quien no modera. */
     @Transactional
-    public TemaResponse visualizar(Long id, UsuarioActual actual) {
+    public TemaResponse visualizar(Long id, UsuarioActual actual, boolean sumarVisita) {
         Tema tema = buscarVisible(id, actual);
-        tema.setVistas(tema.getVistas() + 1);
+        if (sumarVisita) {
+            tema.setVistas(tema.getVistas() + 1);
+        }
         return aRespuesta(tema, puedeModerar(actual));
     }
 
@@ -83,7 +85,8 @@ public class TemaService {
 
     @Transactional
     public TemaResponse actualizar(Long id, TemaActualizarRequest req, UsuarioActual actual) {
-        Tema tema = buscarEntidad(id);
+        // Igual que al consultarlo: un tema baneado responde 404 a quien no modera
+        Tema tema = buscarVisible(id, actual);
         boolean esAutor = actual.esElMismo(tema.getUsuarioId());
         boolean cambiaContenido = req.titulo() != null || req.contenido() != null || req.categoriaId() != null;
 

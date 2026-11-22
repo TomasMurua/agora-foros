@@ -48,10 +48,10 @@ import { PluralPipe } from '../../shared/pipes/plural.pipe';
                     En revisión por el equipo de moderación.
                   }
                 </div>
-                <div class="col-12 col-md-1 d-flex justify-content-md-end">
+                <div class="col-12 col-md-1 d-flex justify-content-md-end text-nowrap">
                   @if (r.reporte.estado === 'PENDIENTE') {
                     <button type="button" class="btn btn-sm btn-outline-danger" (click)="retirar(r)" [attr.aria-label]="'Retirar el reporte ' + r.reporte.id">
-                      <i class="bi bi-x-lg" aria-hidden="true"></i>
+                      <i class="bi bi-x-lg" aria-hidden="true"></i> Retirar
                     </button>
                   }
                 </div>

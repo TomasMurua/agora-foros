@@ -68,10 +68,16 @@ public class TemaController {
                 .add(linkTo(methodOn(TemaController.class).populares(limite)).withSelfRel()));
     }
 
-    /** Detalle de un tema (cada consulta suma una visita). */
+    /**
+     * Detalle de un tema. Cada consulta suma una visita, salvo con ?sumarVisita=false
+     * (ms-moderacion lo usa para confirmar que un tema existe antes de aceptar un reporte).
+     */
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<TemaResponse>> visualizar(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(assembler.toModel(temaService.visualizar(id, UsuarioActual.desde(jwt))));
+    public ResponseEntity<EntityModel<TemaResponse>> visualizar(@PathVariable Long id,
+                                                                @RequestParam(required = false) Boolean sumarVisita,
+                                                                @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(assembler.toModel(
+                temaService.visualizar(id, UsuarioActual.desde(jwt), !Boolean.FALSE.equals(sumarVisita))));
     }
 
     @PostMapping
@@ -108,7 +114,7 @@ public class TemaController {
         return ResponseEntity.ok(comentarioAssembler.toCollectionModel(
                         comentarioService.listarPorTema(id, UsuarioActual.desde(jwt)))
                 .add(linkTo(methodOn(TemaController.class).comentarios(id, null)).withSelfRel())
-                .add(linkTo(methodOn(TemaController.class).visualizar(id, null)).withRel("tema")));
+                .add(linkTo(methodOn(TemaController.class).visualizar(id, null, null)).withRel("tema")));
     }
 
     @PostMapping("/{id}/comentarios")

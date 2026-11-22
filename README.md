@@ -291,7 +291,7 @@ Wallet, que queda montado en `/wallet`. Ya traen `oraclepki`, la librería que l
 
 ## Postman
 
-`postman/Agora-Foros.postman_collection.json` tiene 115 solicitudes con 264 pruebas sobre los tres microservicios.
+`postman/Agora-Foros.postman_collection.json` tiene 120 solicitudes con 269 pruebas sobre los tres microservicios.
 Hay dos entornos: `Agora-Foros-local` apunta a los puertos 8081, 8082 y 8083, y `Agora-Foros-nube` apunta a la URL
 pública. Se importan la colección y el entorno, se ejecuta primero la carpeta Autenticación, que guarda los tokens, y
 después cualquier otra. La colección completa también corre en el Collection Runner o con newman:
@@ -300,8 +300,9 @@ después cualquier otra. La colección completa también corre en el Collection 
 npx newman run postman/Agora-Foros.postman_collection.json -e postman/Agora-Foros-local.postman_environment.json
 ```
 
-La carpeta de `ms-moderacion` crea un tema y un comentario, los reporta, los banea, los restaura y los borra al final.
-Por eso la colección se puede correr varias veces seguidas sin reiniciar la base.
+La carpeta de `ms-moderacion` crea un tema y un comentario, los reporta, los banea, los restaura y al final borra todo
+lo que creó, incluidos sus reportes y sanciones. Por eso la colección se puede correr varias veces seguidas y la base
+queda con los mismos datos iniciales.
 
 Los tests unitarios se corren con `./mvnw test` en cada microservicio y con `npm test` en el frontend.
 

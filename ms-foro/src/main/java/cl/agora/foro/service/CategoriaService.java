@@ -63,7 +63,7 @@ public class CategoriaService {
         Categoria categoria = buscarEntidad(id);
         long temas = temaRepository.countByCategoriaId(id);
         if (temas > 0) {
-            throw ApiException.conflicto("No se puede eliminar la categoría: tiene " + temas + " tema(s) publicado(s)");
+            throw ApiException.conflicto("No se puede eliminar la categoría: tiene " + (temas == 1 ? "un tema publicado" : temas + " temas publicados"));
         }
         categoriaRepository.delete(categoria);
         log.info("Categoría {} eliminada", id);
