@@ -33,7 +33,9 @@ public interface TemaRepository extends JpaRepository<Tema, Long> {
 
     List<Tema> findByCategoriaIdOrderByFechaCreacionDesc(Long categoriaId);
 
-    @Query("select t from Tema t order by t.vistas desc, t.fechaCreacion desc")
+    /** Los temas baneados no aparecen entre los populares. */
+    @Query("select t from Tema t where t.estado <> cl.agora.foro.model.EstadoTema.BANEADO "
+            + "order by t.vistas desc, t.fechaCreacion desc")
     List<Tema> masVistos(Pageable pageable);
 
     long countByCategoriaId(Long categoriaId);

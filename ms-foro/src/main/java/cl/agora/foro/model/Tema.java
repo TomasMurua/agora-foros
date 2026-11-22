@@ -58,6 +58,10 @@ public class Tema {
     @Column(name = "FECHA_ACTUALIZACION")
     private LocalDateTime fechaActualizacion;
 
+    public boolean estaBaneado() {
+        return estado == EstadoTema.BANEADO;
+    }
+
     @PrePersist
     void antesDeGuardar() {
         if (fechaCreacion == null) {

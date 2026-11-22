@@ -6,10 +6,10 @@ import org.springframework.hateoas.server.core.Relation;
 
 @Relation(itemRelation = "comentario", collectionRelation = "comentarios")
 public record ComentarioResponse(Long id, Long temaId, Long usuarioId, String autor, String contenido,
-                                 LocalDateTime fechaCreacion, LocalDateTime fechaActualizacion) {
+                                 boolean baneado, LocalDateTime fechaCreacion, LocalDateTime fechaActualizacion) {
 
     public static ComentarioResponse desde(Comentario c) {
         return new ComentarioResponse(c.getId(), c.getTema().getId(), c.getUsuarioId(), c.getAutor(), c.getContenido(),
-                c.getFechaCreacion(), c.getFechaActualizacion());
+                c.estaBaneado(), c.getFechaCreacion(), c.getFechaActualizacion());
     }
 }
