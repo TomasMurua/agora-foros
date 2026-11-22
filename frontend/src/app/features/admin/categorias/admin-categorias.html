@@ -1,0 +1,64 @@
+<div class="row g-4">
+  <div class="col-12 col-lg-5 col-xl-4">
+    <form class="panel" [formGroup]="form" (ngSubmit)="guardar()" novalidate aria-labelledby="titulo-form-categoria">
+      <h2 id="titulo-form-categoria" class="h5 mb-3">{{ editandoId() ? 'Editar categoría' : 'Nueva categoría' }}</h2>
+      <div class="mb-3">
+        <label for="ac-nombre" class="form-label">Nombre</label>
+        <input id="ac-nombre" type="text" class="form-control" formControlName="nombre" required
+          [attr.minlength]="limites.nombreCategoria.min" [attr.maxlength]="limites.nombreCategoria.max"
+          placeholder="Por ejemplo: Libros" [class.is-invalid]="invalido('nombre')" />
+        <app-campo-error [control]="form.controls.nombre" [enviado]="enviado()" [mensajes]="{ yaExiste: 'Ya existe una categoría con ese nombre.' }" />
+      </div>
+      <div class="mb-3">
+        <label for="ac-descripcion" class="form-label">Descripción <span class="texto-suave">(opcional)</span></label>
+        <textarea id="ac-descripcion" class="form-control" rows="3" formControlName="descripcion" [attr.maxlength]="limites.descripcion.max"
+          [class.is-invalid]="invalido('descripcion')"></textarea>
+        <div class="d-flex justify-content-between gap-2">
+          <app-campo-error [control]="form.controls.descripcion" [enviado]="enviado()" />
+          <app-contador-caracteres class="ms-auto" [control]="form.controls.descripcion" [maximo]="limites.descripcion.max" />
+        </div>
+      </div>
+      <fieldset class="mb-4">
+        <legend class="form-label fs-6">Ícono</legend>
+        <div class="selector-icono">
+          @for (i of iconos; track i.valor) {
+            <input type="radio" class="btn-check" name="icono" formControlName="icono" [id]="'icono-' + i.valor" [value]="i.valor" />
+            <label class="btn btn-outline-secondary" [for]="'icono-' + i.valor" [title]="i.nombre">
+              <i class="bi" [class]="'bi bi-' + i.valor" aria-hidden="true"></i><span class="visually-hidden">{{ i.nombre }}</span>
+            </label>
+          }
+        </div>
+      </fieldset>
+      <div class="d-flex gap-2">
+        @if (editandoId()) {
+          <button type="button" class="btn btn-outline-secondary" (click)="cancelar()">Cancelar</button>
+        }
+        <button type="submit" class="btn btn-primary flex-grow-1" [disabled]="form.invalid && enviado()">
+          {{ editandoId() ? 'Guardar cambios' : 'Crear categoría' }}
+        </button>
+      </div>
+    </form>
+  </div>
+  <div class="col-12 col-lg-7 col-xl-8">
+    <div class="lista-filas">
+      @for (c of foro.categorias(); track c.id) {
+        <div class="fila" [class.fila-activa]="editandoId() === c.id">
+          <div class="row g-2 align-items-center">
+            <div class="col-12 col-md-8 d-flex gap-3 align-items-start">
+              <span class="categoria-icono"><i class="bi" [class]="'bi bi-' + c.icono" aria-hidden="true"></i></span>
+              <div>
+                <strong>{{ c.nombre }}</strong>
+                <div class="small texto-suave">{{ c.descripcion || 'Sin descripción' }}</div>
+                <div class="small texto-suave">{{ admin.temasDeCategoria(c.id) }} temas</div>
+              </div>
+            </div>
+            <div class="col-12 col-md-4 d-flex gap-1 justify-content-md-end">
+              <button type="button" class="btn btn-sm btn-outline-primary" (click)="editar(c)"><i class="bi bi-pencil" aria-hidden="true"></i> Editar</button>
+              <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminar(c)" [attr.aria-label]="'Eliminar ' + c.nombre"><i class="bi bi-trash" aria-hidden="true"></i></button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

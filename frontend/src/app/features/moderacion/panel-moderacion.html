@@ -1,0 +1,180 @@
+<section class="cabecera-pagina cabecera-moderacion">
+  <div class="container">
+    <p class="eyebrow">Equipo de moderación</p>
+    <h1 class="titulo-pagina">Panel de moderación</h1>
+    <p class="bajada-pagina mb-0">Atiende los reportes, banea o restaura contenido y revisa la comunidad.</p>
+  </div>
+</section>
+
+<div class="container pb-5">
+  <div class="pestanas" role="tablist" aria-label="Secciones del panel">
+    @for (p of pestanas(); track p.id) {
+      <button type="button" role="tab" class="pestana" [class.activa]="pestana() === p.id" [attr.aria-selected]="pestana() === p.id"
+        [attr.aria-controls]="'panel-' + p.id" (click)="pestana.set(p.id)">
+        <i class="bi" [class]="'bi bi-' + p.icono" aria-hidden="true"></i>
+        {{ p.nombre }}
+        <span class="badge rounded-pill" [class.badge-pendientes]="p.id === 'reportes' && p.conteo > 0" [class.text-bg-light]="!(p.id === 'reportes' && p.conteo > 0)">{{ p.conteo }}</span>
+      </button>
+    }
+  </div>
+
+  @switch (pestana()) {
+    @case ('reportes') {
+      <section id="panel-reportes" role="tabpanel">
+        <h2 class="h5 mb-3">Reportes pendientes</h2>
+        @if (moderacion.reportesPendientes().length) {
+          <div class="row g-3">
+            @for (r of moderacion.reportesPendientes(); track r.reporte.id) {
+              <div class="col-12 col-xl-6">
+                <article class="reporte-card">
+                  <header class="d-flex flex-wrap gap-2 align-items-center mb-2">
+                    <span class="badge text-bg-light borde-suave">{{ r.reporte.tipoContenido === 'TEMA' ? 'Tema' : 'Comentario' }} #{{ r.reporte.contenidoId }}</span>
+                    @if (r.norma; as n) {
+                      <span class="badge gravedad" [class]="'badge gravedad gravedad-' + n.gravedad.toLowerCase()">{{ n.codigo }} · {{ n.titulo }}</span>
+                    }
+                    <span class="ms-auto small texto-suave">{{ r.reporte.fechaCreacion | tiempoRelativo }}</span>
+                  </header>
+                  <blockquote class="cita-contenido">
+                    {{ r.extracto }}
+                    @if (r.comentario) {
+                      <span class="d-block small texto-suave mt-1">en «{{ tituloTema(r.comentario.temaId) }}» · por {{ r.comentario.autor }}</span>
+                    } @else if (r.tema) {
+                      <span class="d-block small texto-suave mt-1">por {{ r.tema.autor }}</span>
+                    }
+                  </blockquote>
+                  <p class="mb-1"><strong>Motivo:</strong> {{ r.reporte.motivo }}</p>
+                  <p class="small texto-suave mb-3">Reportado por {{ r.reporte.reportante }}</p>
+                  <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-danger btn-sm" (click)="sancionar(r)"><i class="bi bi-slash-circle" aria-hidden="true"></i> Banear y resolver</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="descartar(r)"><i class="bi bi-check2" aria-hidden="true"></i> Descartar</button>
+                    @if (r.temaId) {
+                      <a class="btn btn-link btn-sm" [routerLink]="['/temas', r.temaId]" [fragment]="r.comentario ? 'comentario-' + r.comentario.id : undefined">Ver contenido</a>
+                    }
+                  </div>
+                </article>
+              </div>
+            }
+          </div>
+        } @else {
+          <app-estado-vacio titulo="No hay reportes pendientes" texto="La comunidad está tranquila. Los nuevos reportes aparecerán aquí." imagen="ilustraciones/moderado.svg" />
+        }
+
+        <h2 class="h5 mt-5 mb-3">Reportes atendidos</h2>
+        <div class="lista-filas">
+          @for (r of moderacion.reportesCerrados(); track r.reporte.id) {
+            <div class="fila">
+              <div class="row g-2 align-items-center">
+                <div class="col-12 col-md-5">
+                  <span class="fw-semibold">{{ r.extracto }}</span>
+                  <div class="small texto-suave">{{ r.reporte.tipoContenido === 'TEMA' ? 'Tema' : 'Comentario' }} · {{ r.norma?.codigo }} · reportado por {{ r.reporte.reportante }}</div>
+                </div>
+                <div class="col-6 col-md-2">
+                  <span class="badge" [class.text-bg-success]="r.reporte.estado === 'RESUELTO'" [class.text-bg-secondary]="r.reporte.estado === 'DESCARTADO'">
+                    {{ r.reporte.estado === 'RESUELTO' ? 'Resuelto' : 'Descartado' }}
+                  </span>
+                </div>
+                <div class="col-6 col-md-5 small texto-suave">{{ r.reporte.resolucion }} ({{ r.reporte.resueltoPor }}, {{ r.reporte.fechaResolucion | date: 'd MMM' }})</div>
+              </div>
+            </div>
+          } @empty {
+            <p class="texto-suave">Todavía no hay reportes atendidos.</p>
+          }
+        </div>
+      </section>
+    }
+
+    @case ('contenido') {
+      <section id="panel-contenido" role="tabpanel">
+        <h2 class="h5 mb-3">Temas del foro</h2>
+        <div class="lista-filas mb-5">
+          @for (t of moderacion.todosLosTemas(); track t.id) {
+            <div class="fila" [class.fila-baneada]="t.estado === 'BANEADO'">
+              <div class="row g-2 align-items-center">
+                <div class="col-12 col-md-6">
+                  <a class="fw-semibold" [routerLink]="['/temas', t.id]">{{ t.titulo }}</a>
+                  <div class="small texto-suave">{{ t.autor }} · {{ foro.categoriaPorId(t.categoriaId)?.nombre }} · {{ t.fechaCreacion | date: 'd MMM y' }}</div>
+                </div>
+                <div class="col-12 col-sm-4 col-md-2"><app-estado-badge [estado]="t.estado" /></div>
+                <div class="col-12 col-sm-8 col-md-4 d-flex flex-wrap gap-1 justify-content-sm-end">
+                  @if (t.estado === 'BANEADO') {
+                    <button type="button" class="btn btn-sm btn-outline-success" (click)="restaurar('TEMA', t.id, t.titulo)"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> Restaurar</button>
+                  } @else {
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="alternarEstado(t)">
+                      <i class="bi" [class.bi-lock]="t.estado === 'ABIERTO'" [class.bi-unlock]="t.estado === 'CERRADO'" aria-hidden="true"></i>
+                      {{ t.estado === 'ABIERTO' ? 'Cerrar' : 'Reabrir' }}
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="banearTema(t)"><i class="bi bi-slash-circle" aria-hidden="true"></i> Banear</button>
+                  }
+                  <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminarTema(t)" [attr.aria-label]="'Eliminar ' + t.titulo"><i class="bi bi-trash" aria-hidden="true"></i></button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <h2 class="h5 mb-3">Comentarios baneados</h2>
+        <div class="lista-filas">
+          @for (c of moderacion.comentariosBaneados(); track c.id) {
+            <div class="fila fila-baneada">
+              <div class="row g-2 align-items-center">
+                <div class="col-12 col-md-8">
+                  <span>{{ c.contenido }}</span>
+                  <div class="small texto-suave">{{ c.autor }} en <a [routerLink]="['/temas', c.temaId]">{{ tituloTema(c.temaId) }}</a></div>
+                </div>
+                <div class="col-12 col-md-4 d-flex gap-1 justify-content-md-end">
+                  <button type="button" class="btn btn-sm btn-outline-success" (click)="restaurar('COMENTARIO', c.id, c.contenido)"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> Restaurar</button>
+                  <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminarComentario(c.id)" aria-label="Eliminar comentario"><i class="bi bi-trash" aria-hidden="true"></i></button>
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <p class="texto-suave">No hay comentarios baneados. Para banear uno, ábrelo desde su tema.</p>
+          }
+        </div>
+      </section>
+    }
+
+    @case ('usuarios') {
+      <section id="panel-usuarios" role="tabpanel">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <h2 class="h5 mb-0">Usuarios del foro</h2>
+          <span class="small texto-suave"><i class="bi bi-eye" aria-hidden="true"></i> Solo lectura{{ auth.esAdmin() ? '. Para cambiar cuentas usa Administración.' : '' }}</span>
+        </div>
+        <div class="row g-3">
+          @for (u of moderacion.usuarios(); track u.id) {
+            <div class="col-12 col-md-6 col-xl-4">
+              <div class="usuario-card" [class.usuario-bloqueado]="!u.activo">
+                <app-avatar [nombre]="u.nombreCompleto" [color]="u.colorAvatar" />
+                <div class="flex-grow-1 min-w-0">
+                  <strong class="d-block text-truncate">{{ u.nombreCompleto }}</strong>
+                  <span class="small texto-suave d-block text-truncate">&#64;{{ u.nombreUsuario }} · {{ u.correo }}</span>
+                  <div class="d-flex gap-1 mt-1">
+                    <span class="badge rol-badge" [class]="'badge rol-badge rol-' + u.rol.toLowerCase()">{{ etiquetaRol[u.rol] }}</span>
+                    @if (!u.activo) {
+                      <span class="badge text-bg-danger">Bloqueado</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>
+
+@if (dialogo(); as d) {
+  <app-dialogo-motivo
+    [titulo]="d.accion === 'restaurar' ? 'Restaurar contenido' : d.accion === 'sancionar' ? 'Banear y resolver reporte' : 'Banear tema'"
+    [icono]="d.accion === 'restaurar' ? 'arrow-counterclockwise' : 'slash-circle'"
+    [descripcion]="d.accion === 'restaurar' ? 'El contenido vuelve a verse y la restauración queda en el historial.' : 'El contenido dejará de verse para los usuarios, la sanción queda en el historial y los reportes del contenido se marcan como resueltos.'"
+    [contexto]="d.contexto"
+    [normas]="moderacion.normas()"
+    [normaInicial]="d.normaId ?? null"
+    [pedirNorma]="d.accion !== 'restaurar'"
+    [textoConfirmar]="d.accion === 'restaurar' ? 'Restaurar' : 'Banear'"
+    [peligro]="d.accion !== 'restaurar'"
+    (confirmar)="confirmarDialogo($event)"
+    (cancelar)="dialogo.set(null)" />
+}

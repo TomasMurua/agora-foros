@@ -1,0 +1,87 @@
+<form class="panel filtros-horizontales mb-3" [formGroup]="filtros" novalidate aria-label="Filtros de usuarios">
+  <div class="row g-2 align-items-end">
+    <div class="col-12 col-md-6 col-lg-5">
+      <label for="au-texto" class="form-label">Buscar</label>
+      <input id="au-texto" type="search" class="form-control" formControlName="texto" maxlength="60" placeholder="Nombre, usuario o correo"
+        [class.is-invalid]="filtros.controls.texto.invalid" />
+      <app-campo-error [control]="filtros.controls.texto" [enviado]="true" />
+    </div>
+    <div class="col-6 col-md-3">
+      <label for="au-rol" class="form-label">Rol</label>
+      <select id="au-rol" class="form-select" formControlName="rol">
+        <option value="">Todos</option>
+        @for (r of roles; track r) {
+          <option [value]="r">{{ etiquetaRol[r] }}</option>
+        }
+      </select>
+    </div>
+    <div class="col-6 col-md-3">
+      <label for="au-estado" class="form-label">Estado</label>
+      <select id="au-estado" class="form-select" formControlName="estado">
+        <option value="">Todos</option>
+        <option value="activos">Activos</option>
+        <option value="bloqueados">Bloqueados</option>
+      </select>
+    </div>
+    <div class="col-12 col-lg-1">
+      <button type="button" class="btn btn-outline-secondary w-100" (click)="filtros.reset()" title="Limpiar filtros"><i class="bi bi-x-lg" aria-hidden="true"></i><span class="d-lg-none"> Limpiar filtros</span><span class="visually-hidden d-none d-lg-inline">Limpiar filtros</span></button>
+    </div>
+  </div>
+</form>
+
+<p class="small texto-suave">{{ lista().length }} de {{ admin.usuarios().length }} cuentas</p>
+
+@if (lista().length) {
+  <div class="lista-filas">
+    <div class="fila fila-cabecera d-none d-lg-block">
+      <div class="row g-2">
+        <div class="col-lg-4">Usuario</div>
+        <div class="col-lg-2">Registro</div>
+        <div class="col-lg-2">Rol</div>
+        <div class="col-lg-1">Estado</div>
+        <div class="col-lg-3 text-end">Acciones</div>
+      </div>
+    </div>
+    @for (u of lista(); track u.id) {
+      @let propio = admin.esUsuarioActual(u.id);
+      <div class="fila" [class.fila-baneada]="!u.activo">
+        <div class="row g-2 align-items-center">
+          <div class="col-12 col-lg-4 d-flex align-items-center gap-2 min-w-0">
+            <app-avatar [nombre]="u.nombreCompleto" [color]="u.colorAvatar" tamano="sm" />
+            <div class="min-w-0">
+              <strong class="d-block text-truncate">{{ u.nombreCompleto }} @if (propio) { <span class="badge text-bg-light borde-suave">Tú</span> }</strong>
+              <span class="small texto-suave d-block text-truncate">&#64;{{ u.nombreUsuario }} · {{ u.correo }}</span>
+            </div>
+          </div>
+          <div class="col-6 col-lg-2 small texto-suave">{{ u.fechaRegistro | date: 'd MMM y' }} · {{ u.temas }} {{ u.temas === 1 ? 'tema' : 'temas' }}</div>
+          <div class="col-6 col-lg-2">
+            <label class="visually-hidden" [for]="'rol-' + u.id">Rol de {{ u.nombreUsuario }}</label>
+            <select class="form-select form-select-sm" [id]="'rol-' + u.id" [value]="u.rol" [disabled]="propio" (change)="cambiarRol(u, $event)">
+              @for (r of roles; track r) {
+                <option [value]="r" [selected]="r === u.rol">{{ etiquetaRol[r] }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-6 col-lg-1">
+            @if (u.activo) {
+              <span class="badge text-bg-success">Activa</span>
+            } @else {
+              <span class="badge text-bg-danger">Bloqueada</span>
+            }
+          </div>
+          <div class="col-6 col-lg-3 d-flex gap-1 justify-content-end">
+            <button type="button" class="btn btn-sm" [class.btn-outline-warning]="u.activo" [class.btn-outline-success]="!u.activo" [disabled]="propio" (click)="alternarBloqueo(u)">
+              <i class="bi" [class.bi-lock]="u.activo" [class.bi-unlock]="!u.activo" aria-hidden="true"></i>
+              {{ u.activo ? 'Bloquear' : 'Desbloquear' }}
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="propio" (click)="eliminar(u)" [attr.aria-label]="'Eliminar la cuenta de ' + u.nombreUsuario">
+              <i class="bi bi-trash" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+} @else {
+  <app-estado-vacio titulo="Ninguna cuenta coincide" texto="Cambia los filtros para ver más resultados." />
+}
