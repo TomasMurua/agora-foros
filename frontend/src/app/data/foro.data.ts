@@ -146,7 +146,7 @@ export const COMENTARIOS_INICIALES: readonly Comentario[] = [
     usuarioId: 4,
     autor: 'matias.soto',
     contenido:
-      'Spring Boot tiene mucha más documentación y comunidad. Para empezar me quedaria con eso.',
+      'Spring Boot tiene mucha más documentación y comunidad. Para empezar me quedaría con eso.',
     baneado: false,
     fechaCreacion: '2026-10-25T20:02:00',
     fechaActualizacion: null,

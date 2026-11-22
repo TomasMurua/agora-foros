@@ -43,8 +43,8 @@
             </header>
             <div class="tema-contenido">{{ t.contenido }}</div>
             <footer class="tema-pie">
-              <span><i class="bi bi-eye" aria-hidden="true"></i> {{ t.vistas | number }} vistas</span>
-              <span><i class="bi bi-chat-left-text" aria-hidden="true"></i> {{ comentariosVisibles() }} comentarios</span>
+              <span><i class="bi bi-eye" aria-hidden="true"></i> {{ t.vistas | plural: 'vista' : 'vistas' }}</span>
+              <span><i class="bi bi-chat-left-text" aria-hidden="true"></i> {{ comentariosVisibles() | plural: 'comentario' : 'comentarios' }}</span>
             </footer>
 
             <div class="tema-acciones">
@@ -61,7 +61,11 @@
                 </button>
               }
               @if (auth.estaAutenticado() && !foro.esAutor(t) && t.estado !== 'BANEADO') {
-                <button type="button" class="btn btn-outline-secondary btn-sm" (click)="abrirDialogo('reportar', 'TEMA', t.id, t.titulo)"><i class="bi bi-flag" aria-hidden="true"></i> Reportar</button>
+                @if (moderacion.yaReportado('TEMA', t.id)) {
+                  <button type="button" class="btn btn-outline-secondary btn-sm" disabled><i class="bi bi-flag-fill" aria-hidden="true"></i> Reportado</button>
+                } @else {
+                  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="abrirDialogo('reportar', 'TEMA', t.id, t.titulo)"><i class="bi bi-flag" aria-hidden="true"></i> Reportar</button>
+                }
               }
               @if (auth.esModerador()) {
                 @if (t.estado === 'BANEADO') {
@@ -81,7 +85,7 @@
             @if (comentarios().length) {
               <div class="d-grid gap-3">
                 @for (c of comentarios(); track c.id) {
-                  <app-comentario-item [comentario]="c" [permisos]="permisosDe(c)" [colorAutor]="colorDe(c.autor)" [esAutorTema]="c.usuarioId === t.usuarioId"
+                  <app-comentario-item [comentario]="c" [permisos]="permisosDe(c)" [colorAutor]="colorDe(c.autor)" [esAutorTema]="c.usuarioId === t.usuarioId" [reportado]="moderacion.yaReportado('COMENTARIO', c.id)"
                     (editar)="editarComentario(c.id, $event)" (eliminar)="eliminarComentario(c)"
                     (reportar)="abrirDialogo('reportar', 'COMENTARIO', c.id, c.contenido)"
                     (banear)="abrirDialogo('banear', 'COMENTARIO', c.id, c.contenido)"

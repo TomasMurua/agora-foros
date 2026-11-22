@@ -1,6 +1,7 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { Component, computed, effect, inject, input, numberAttribute, signal, untracked } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Title } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { AuthFacade } from '../../../core/facades/auth.facade';
 import { ForoFacade } from '../../../core/facades/foro.facade';
@@ -17,6 +18,7 @@ import { ContadorCaracteres } from '../../../shared/components/contador-caracter
 import { DialogoMotivo } from '../../../shared/components/dialogo-motivo';
 import { EstadoBadge } from '../../../shared/components/estado-badge';
 import { EstadoVacio } from '../../../shared/components/estado-vacio';
+import { PluralPipe } from '../../../shared/pipes/plural.pipe';
 import { TiempoRelativoPipe } from '../../../shared/pipes/tiempo-relativo.pipe';
 
 type AccionDialogo = 'reportar' | 'banear' | 'restaurar';
@@ -35,7 +37,6 @@ interface Dialogo {
     RouterLink,
     ReactiveFormsModule,
     DatePipe,
-    DecimalPipe,
     TiempoRelativoPipe,
     Avatar,
     EstadoBadge,
@@ -44,6 +45,7 @@ interface Dialogo {
     CampoError,
     ContadorCaracteres,
     DialogoMotivo,
+    PluralPipe,
   ],
   templateUrl: './detalle-tema.html',
 })
@@ -51,6 +53,7 @@ export class DetalleTema {
   protected readonly foro = inject(ForoFacade);
   protected readonly auth = inject(AuthFacade);
   protected readonly moderacion = inject(ModeracionFacade);
+  private readonly titulo = inject(Title);
   private readonly notificaciones = inject(NotificacionService);
   private readonly confirmacion = inject(ConfirmacionService);
   private readonly router = inject(Router);
@@ -95,6 +98,21 @@ export class DetalleTema {
       const id = this.id();
       untracked(() => this.foro.registrarVista(id));
     });
+    // La pestaña del navegador muestra el título del tema que se está leyendo.
+    effect(() => {
+      const tema = this.tema();
+      if (tema && this.visible()) {
+        this.titulo.setTitle(`${tema.titulo} | Ágora Foros`);
+      }
+    });
+  }
+
+  private textoComentarios(): string {
+    const cantidad = this.comentarios().length;
+    if (cantidad === 0) {
+      return '';
+    }
+    return cantidad === 1 ? ' junto con su comentario' : ` junto con sus ${cantidad} comentarios`;
   }
 
   protected permisosDe(comentario: Comentario): PermisosComentario {
@@ -151,7 +169,7 @@ export class DetalleTema {
     }
     const ok = await this.confirmacion.confirmar({
       titulo: 'Eliminar tema',
-      mensaje: `Vas a eliminar "${tema.titulo}" junto con sus ${this.comentarios().length} comentarios. Esta acción no se puede deshacer.`,
+      mensaje: `Vas a eliminar "${tema.titulo}"${this.textoComentarios()}. Esta acción no se puede deshacer.`,
       textoConfirmar: 'Eliminar tema',
       peligro: true,
     });

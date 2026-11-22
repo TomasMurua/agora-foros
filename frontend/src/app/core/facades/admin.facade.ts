@@ -11,6 +11,7 @@ import {
 } from '../repositories/moderacion.repository';
 import { UsuarioRepository } from '../repositories/usuario.repository';
 import { AuthFacade } from './auth.facade';
+import { plural } from '../utils/plural';
 
 export type UsuarioAdmin = Omit<Usuario, 'password'> & { temas: number };
 
@@ -175,7 +176,7 @@ export class AdminFacade {
     }
     const temas = this.temasDeCategoria(id);
     if (temas > 0) {
-      return fallo(`No se puede eliminar: la categoría tiene ${temas} tema(s). Muévelos o elimínalos primero.`);
+      return fallo(`No se puede eliminar: la categoría tiene ${plural(temas, 'tema', 'temas')}. Muévelos o elimínalos primero.`);
     }
     this.categoriasRepo.eliminar(id);
     return exito(`La categoría "${categoria.nombre}" fue eliminada.`);
@@ -243,7 +244,7 @@ export class AdminFacade {
     }
     const usos = this.usosDeNorma(id);
     if (usos > 0) {
-      return fallo(`No se puede eliminar: ${usos} reporte(s) o sanción(es) la citan.`);
+      return fallo(`No se puede eliminar: la citan ${usos === 1 ? 'un reporte o sanción' : `${usos} reportes o sanciones`}. Desactívala en su lugar.`);
     }
     this.normasRepo.eliminar(id);
     return exito(`La norma ${norma.codigo} fue eliminada.`);

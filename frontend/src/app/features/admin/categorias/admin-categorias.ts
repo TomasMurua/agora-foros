@@ -8,11 +8,13 @@ import { NotificacionService } from '../../../core/services/notificacion.service
 import { LIMITES, sinSoloEspacios, valorUnico } from '../../../core/validators/agora.validators';
 import { CampoError } from '../../../shared/components/campo-error';
 import { ContadorCaracteres } from '../../../shared/components/contador-caracteres';
+import { plural } from '../../../core/utils/plural';
+import { PluralPipe } from '../../../shared/pipes/plural.pipe';
 
 /** Página contenedora: CRUD de categorías del foro. */
 @Component({
   selector: 'app-admin-categorias',
-  imports: [ReactiveFormsModule, CampoError, ContadorCaracteres],
+  imports: [ReactiveFormsModule, CampoError, ContadorCaracteres, PluralPipe],
   templateUrl: './admin-categorias.html',
 })
 export class AdminCategorias {
@@ -78,7 +80,7 @@ export class AdminCategorias {
   protected async eliminar(categoria: Categoria): Promise<void> {
     const temas = this.admin.temasDeCategoria(categoria.id);
     if (temas > 0) {
-      this.notificaciones.error(`"${categoria.nombre}" tiene ${temas} tema(s). Solo se eliminan categorías vacías.`);
+      this.notificaciones.error(`"${categoria.nombre}" tiene ${plural(temas, 'tema', 'temas')}. Solo se eliminan categorías vacías.`);
       return;
     }
     const ok = await this.confirmacion.confirmar({

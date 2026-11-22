@@ -79,7 +79,9 @@ export interface PermisosComentario {
               @if (permisos().eliminar) {
                 <button type="button" class="btn btn-link btn-sm text-danger" (click)="eliminar.emit()"><i class="bi bi-trash" aria-hidden="true"></i> Eliminar</button>
               }
-              @if (permisos().reportar) {
+              @if (permisos().reportar && reportado()) {
+                <button type="button" class="btn btn-link btn-sm" disabled><i class="bi bi-flag-fill" aria-hidden="true"></i> Reportado</button>
+              } @else if (permisos().reportar) {
                 <button type="button" class="btn btn-link btn-sm" (click)="reportar.emit()"><i class="bi bi-flag" aria-hidden="true"></i> Reportar</button>
               }
               @if (permisos().moderar) {
@@ -101,6 +103,8 @@ export class ComentarioItem {
   readonly permisos = input<PermisosComentario>({ editar: false, eliminar: false, reportar: false, moderar: false });
   readonly colorAutor = input<string | null | undefined>(null);
   readonly esAutorTema = input(false);
+  /** true si quien mira ya tiene un reporte pendiente sobre este comentario. */
+  readonly reportado = input(false);
 
   readonly editar = output<string>();
   readonly eliminar = output<void>();

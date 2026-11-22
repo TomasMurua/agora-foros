@@ -43,4 +43,23 @@ describe('ModeracionFacade', () => {
     expect(moderacion.comentariosBaneados()).toHaveLength(0);
     expect(moderacion.sanciones()).toHaveLength(5);
   });
+  it('cada usuario ve sus reportes y retira solo los pendientes', () => {
+    auth.iniciarSesion('camila.diaz', 'Usuario2026!');
+    expect(moderacion.misReportes().map((r) => r.reporte.id)).toEqual([3, 1]);
+    expect(moderacion.retirarReporte(3).ok).toBe(false);
+    expect(moderacion.retirarReporte(2).ok).toBe(false);
+    expect(moderacion.retirarReporte(1).ok).toBe(true);
+    expect(moderacion.misReportes()).toHaveLength(1);
+  });
+
+  it('solo el ADMIN corrige o borra sanciones del historial', () => {
+    auth.iniciarSesion('moderador', 'Moder2026!');
+    expect(moderacion.eliminarSancion(1).ok).toBe(false);
+    auth.cerrarSesion();
+    auth.iniciarSesion('admin', 'Admin2026!');
+    expect(moderacion.corregirSancion(1, 'corto').ok).toBe(false);
+    expect(moderacion.corregirSancion(1, 'Lenguaje ofensivo hacia otro usuario del foro.').ok).toBe(true);
+    expect(moderacion.eliminarSancion(2).ok).toBe(true);
+    expect(moderacion.sanciones()).toHaveLength(2);
+  });
 });

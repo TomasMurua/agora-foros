@@ -990,8 +990,8 @@ fieldset legend {
 
 .pestanas {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.4rem;
-  overflow-x: auto;
   padding-bottom: 0.25rem;
   margin-bottom: var(--ag-esp-4);
   border-bottom: 1px solid var(--ag-arena-borde);

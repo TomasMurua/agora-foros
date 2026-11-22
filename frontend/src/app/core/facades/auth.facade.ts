@@ -168,7 +168,8 @@ export class AuthFacade {
         this.recuperacion = null;
         return fallo('Superaste los 3 intentos. Solicita un código nuevo.');
       }
-      return fallo(`El código no es correcto. Te quedan ${INTENTOS_CODIGO - solicitud.intentos} intentos.`);
+      const quedan = INTENTOS_CODIGO - solicitud.intentos;
+      return fallo(`El código no es correcto. ${quedan === 1 ? 'Te queda 1 intento' : `Te quedan ${quedan} intentos`}.`);
     }
     solicitud.verificado = true;
     return exito('Código verificado. Ahora elige tu nueva contraseña.');

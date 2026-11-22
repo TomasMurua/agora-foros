@@ -49,7 +49,7 @@
               <div>
                 <strong>{{ c.nombre }}</strong>
                 <div class="small texto-suave">{{ c.descripcion || 'Sin descripción' }}</div>
-                <div class="small texto-suave">{{ admin.temasDeCategoria(c.id) }} temas</div>
+                <div class="small texto-suave">{{ admin.temasDeCategoria(c.id) | plural: 'tema' : 'temas' }}</div>
               </div>
             </div>
             <div class="col-12 col-md-4 d-flex gap-1 justify-content-md-end">

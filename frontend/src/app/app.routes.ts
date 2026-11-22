@@ -66,6 +66,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/temas/mis-temas/mis-temas').then((m) => m.MisTemas),
   },
   {
+    path: 'mis-reportes',
+    title: 'Mis reportes',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/perfil/mis-reportes').then((m) => m.MisReportes),
+  },
+  {
     path: 'perfil',
     canActivate: [authGuard],
     loadChildren: () => import('./features/perfil/perfil.routes').then((m) => m.PERFIL_RUTAS),

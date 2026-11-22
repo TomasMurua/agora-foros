@@ -1,14 +1,14 @@
-import { DecimalPipe } from '@angular/common';
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ResumenTema } from '../../core/models/foro.model';
 import { TiempoRelativoPipe } from '../pipes/tiempo-relativo.pipe';
 import { EstadoBadge } from './estado-badge';
+import { PluralPipe } from '../pipes/plural.pipe';
 
 /** Componente de presentación: tarjeta de un tema en las listas. */
 @Component({
   selector: 'app-tema-card',
-  imports: [RouterLink, EstadoBadge, TiempoRelativoPipe, DecimalPipe],
+  imports: [RouterLink, EstadoBadge, TiempoRelativoPipe, PluralPipe],
   template: `
     @let t = resumen().tema;
     <article class="tema-card" [class.tema-card-baneado]="t.estado === 'BANEADO'">
@@ -32,7 +32,7 @@ import { EstadoBadge } from './estado-badge';
         <div class="tema-card-meta">
           <span><i class="bi bi-person" aria-hidden="true"></i>{{ t.autor }}</span>
           <span><i class="bi bi-clock" aria-hidden="true"></i>{{ t.fechaCreacion | tiempoRelativo }}</span>
-          <span><i class="bi bi-eye" aria-hidden="true"></i>{{ t.vistas | number }} vistas</span>
+          <span><i class="bi bi-eye" aria-hidden="true"></i>{{ t.vistas | plural: 'vista' : 'vistas' }}</span>
           <span><i class="bi bi-chat-left-text" aria-hidden="true"></i>{{ resumen().comentarios }} {{ resumen().comentarios === 1 ? 'comentario' : 'comentarios' }}</span>
         </div>
       </div>
