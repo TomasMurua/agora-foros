@@ -10,4 +10,10 @@ public record CategoriaRequest(
 
         @Size(max = 300, message = "La descripción no puede superar 300 caracteres")
         String descripcion) {
+
+    /** Quita los espacios del inicio y del final antes de validar los largos. */
+    public CategoriaRequest {
+        nombre = Textos.limpiar(nombre);
+        descripcion = Textos.limpiar(descripcion);
+    }
 }

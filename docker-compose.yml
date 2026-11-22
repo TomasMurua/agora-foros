@@ -10,6 +10,7 @@ services:
       - "1521:1521"
     environment:
       ORACLE_PASSWORD: ${ORACLE_PASSWORD:-Agora2026}
+      TZ: America/Santiago
     volumes:
       - ./bd:/opt/agora/bd:ro
       - ./docker/initdb:/container-entrypoint-initdb.d:ro
@@ -32,6 +33,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-agora-foros-clave-local-de-desarrollo-2026-cambiar}
       CORS_ORIGENES: http://localhost:8080,http://localhost:4200
       LOG_NIVEL: INFO
+      TZ: America/Santiago
     ports:
       - "8081:8081"
 

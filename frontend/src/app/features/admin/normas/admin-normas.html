@@ -50,7 +50,7 @@
                 <span class="badge gravedad" [class]="'badge gravedad gravedad-' + n.gravedad.toLowerCase()">Gravedad {{ n.gravedad.toLowerCase() }}</span>
               </div>
               <div class="small texto-suave">{{ n.descripcion }}</div>
-              <div class="small texto-suave">Citada en {{ admin.usosDeNorma(n.id) }} reporte(s) o sanción(es)</div>
+              <div class="small texto-suave">Citada en {{ admin.usosDeNorma(n.id) | plural: 'reporte o sanción' : 'reportes o sanciones' }}</div>
             </div>
             <div class="col-12 col-md-4 d-flex gap-1 justify-content-md-end">
               <button type="button" class="btn btn-sm btn-outline-primary" (click)="editar(n)"><i class="bi bi-pencil" aria-hidden="true"></i> Editar</button>

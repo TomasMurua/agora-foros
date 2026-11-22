@@ -8,4 +8,9 @@ public record LoginRequest(
 
         @NotBlank(message = "La contraseña es obligatoria")
         String password) {
+
+    /** Quita los espacios del inicio y del final antes de validar los largos. */
+    public LoginRequest {
+        usuario = Textos.limpiar(usuario);
+    }
 }

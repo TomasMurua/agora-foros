@@ -607,7 +607,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"nombreUsuario\": \"javiera.munoz\",\n  \"correo\": \"javiera.munoz@correo.cl\",\n  \"password\": \"Foro2026x\",\n  \"nombreCompleto\": \"Javiera Muñoz\"\n}",
+                  "raw": "{\n  \"nombreUsuario\": \"javiera.munoz\",\n  \"correo\": \"javiera.munoz@correo.cl\",\n  \"password\": \"Foro2026x!\",\n  \"nombreCompleto\": \"Javiera Muñoz\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -699,7 +699,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"nombreUsuario\": \"javiera.munoz\",\n  \"correo\": \"otra@correo.cl\",\n  \"password\": \"Foro2026x\",\n  \"nombreCompleto\": \"Repetida\"\n}",
+                  "raw": "{\n  \"nombreUsuario\": \"javiera.munoz\",\n  \"correo\": \"otra@correo.cl\",\n  \"password\": \"Foro2026x!\",\n  \"nombreCompleto\": \"Repetida\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -747,7 +747,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"usuario\": \"javiera.munoz\",\n  \"password\": \"Foro2026x\"\n}",
+                  "raw": "{\n  \"usuario\": \"javiera.munoz\",\n  \"password\": \"Foro2026x!\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1286,7 +1286,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"usuario\": \"javiera.munoz\",\n  \"password\": \"Foro2026x\"\n}",
+                  "raw": "{\n  \"usuario\": \"javiera.munoz\",\n  \"password\": \"Foro2026x!\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -2874,7 +2874,7 @@
     },
     {
       "name": "ms-moderacion",
-      "description": "Normas del foro, reportes de usuarios y sanciones (banear y restaurar). Necesita los tokens de la carpeta Autenticación de ms-usuarios.",
+      "description": "Normas del foro, reportes de usuarios y sanciones (banear y restaurar). Necesita los tokens de la carpeta Autenticación de ms-usuarios. Al final borra los reportes y sanciones que creó, así la base queda como estaba.",
       "item": [
         {
           "name": "Normas",
@@ -3586,6 +3586,60 @@
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"tipoContenido\": \"COMENTARIO\",\n  \"contenidoId\": {{comentarioModerarId}},\n  \"normaId\": 1,\n  \"motivo\": \"Me parece un comentario fuera de lugar.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Reportar contenido propio (400)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Explica el motivo\", function () { pm.expect(pm.response.json().mensaje).to.include(\"propio contenido\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoContenido\": \"TEMA\",\n  \"contenidoId\": {{temaModerarId}},\n  \"normaId\": 2,\n  \"motivo\": \"Intento reportar mi propio tema.\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -4333,6 +4387,46 @@
               }
             },
             {
+              "name": "La autora no puede borrar su tema baneado (404)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 404\", function () { pm.response.to.have.status(404); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/{{temaModerarId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "{{temaModerarId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
               "name": "Tema baneado visible para MODERADOR",
               "event": [
                 {
@@ -4769,7 +4863,8 @@
                     "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
-                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 201) { pm.collectionVariables.set(\"sancionRestaurarTemaId\", pm.response.json().id); }"
                     ]
                   }
                 }
@@ -5252,6 +5347,201 @@
                   ]
                 }
               }
+            },
+            {
+              "name": "Limpieza: borrar sanción del baneo del tema (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones/{{sancionTemaId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones",
+                    "{{sancionTemaId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Limpieza: borrar sanción de la restauración del tema (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones/{{sancionRestaurarTemaId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones",
+                    "{{sancionRestaurarTemaId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Limpieza: borrar sanción del comentario (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones/{{sancionComentarioId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones",
+                    "{{sancionComentarioId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Limpieza: borrar reporte del tema (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes/{{reporteTemaId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes",
+                    "{{reporteTemaId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Limpieza: borrar reporte del comentario (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes/{{reporteComentarioId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes",
+                    "{{reporteComentarioId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
             }
           ]
         }
@@ -5345,6 +5635,10 @@
     },
     {
       "key": "sancionRestaurarId",
+      "value": ""
+    },
+    {
+      "key": "sancionRestaurarTemaId",
       "value": ""
     }
   ]

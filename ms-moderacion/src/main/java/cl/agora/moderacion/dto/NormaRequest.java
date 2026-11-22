@@ -24,4 +24,11 @@ public record NormaRequest(
 
         /** Opcional: si no viene, la norma queda activa. */
         Boolean activa) {
+
+    /** Quita los espacios del inicio y del final antes de validar los largos. */
+    public NormaRequest {
+        codigo = Textos.limpiar(codigo);
+        titulo = Textos.limpiar(titulo);
+        descripcion = Textos.limpiar(descripcion);
+    }
 }

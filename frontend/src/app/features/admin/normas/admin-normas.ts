@@ -8,11 +8,12 @@ import { NotificacionService } from '../../../core/services/notificacion.service
 import { LIMITES, sinSoloEspacios, valorUnico } from '../../../core/validators/agora.validators';
 import { CampoError } from '../../../shared/components/campo-error';
 import { ContadorCaracteres } from '../../../shared/components/contador-caracteres';
+import { PluralPipe } from '../../../shared/pipes/plural.pipe';
 
 /** Página contenedora: CRUD de las normas del foro. */
 @Component({
   selector: 'app-admin-normas',
-  imports: [ReactiveFormsModule, CampoError, ContadorCaracteres],
+  imports: [ReactiveFormsModule, CampoError, ContadorCaracteres, PluralPipe],
   templateUrl: './admin-normas.html',
 })
 export class AdminNormas {
@@ -83,7 +84,7 @@ export class AdminNormas {
   protected async eliminar(norma: Norma): Promise<void> {
     const usos = this.admin.usosDeNorma(norma.id);
     if (usos > 0) {
-      this.notificaciones.error(`La norma ${norma.codigo} aparece en ${usos} reporte(s) o sanción(es) y no se puede eliminar.`);
+      this.notificaciones.error(`La norma ${norma.codigo} aparece en ${usos === 1 ? 'un reporte o sanción' : `${usos} reportes o sanciones`} y no se puede eliminar. Desactívala en su lugar.`);
       return;
     }
     const ok = await this.confirmacion.confirmar({

@@ -33,7 +33,7 @@ public class ForoClient {
     /** Consulta un tema o comentario con el token de quien pregunta (404 si no existe o no lo puede ver). */
     public ContenidoForo obtener(TipoContenido tipo, Long id, String token) {
         return ejecutar(tipo, id, () -> restClient.get()
-                .uri(ruta(tipo) + "/{id}", id)
+                .uri(tipo == TipoContenido.TEMA ? ruta(tipo) + "/{id}?sumarVisita=false" : ruta(tipo) + "/{id}", id)
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()

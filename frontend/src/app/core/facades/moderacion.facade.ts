@@ -17,6 +17,7 @@ import {
 } from '../repositories/moderacion.repository';
 import { UsuarioRepository } from '../repositories/usuario.repository';
 import { AuthFacade } from './auth.facade';
+import { LIMITES } from '../validators/agora.validators';
 
 /** Reporte con el contenido y la norma ya resueltos, listo para la vista. */
 export interface ReporteDetallado {
@@ -78,6 +79,19 @@ export class ModeracionFacade {
   );
 
   readonly cantidadPendientes = computed(() => this.reportesPendientes().length);
+
+  /** Reportes que envió la persona con sesión, los más recientes primero. */
+  readonly misReportes = computed(() => {
+    const usuario = this.auth.usuarioActual();
+    if (!usuario) {
+      return [];
+    }
+    return this.reportesRepo
+      .todos()
+      .filter((r) => r.reportanteId === usuario.id)
+      .sort((a, b) => b.fechaCreacion.localeCompare(a.fechaCreacion))
+      .map((r) => this.detallar(r));
+  });
 
   readonly temasBaneados = computed(() =>
     this.temasRepo.todos().filter((t) => t.estado === 'BANEADO'),
@@ -161,6 +175,46 @@ export class ModeracionFacade {
       resolucion: null,
     });
     return exito('Gracias. Tu reporte llegó al equipo de moderación.', reporte);
+  }
+
+  /** El autor retira su reporte mientras nadie lo revisa. */
+  retirarReporte(reporteId: number): Resultado {
+    const usuario = this.auth.usuarioActual();
+    const reporte = this.reportesRepo.buscarPorId(reporteId);
+    if (!usuario || !reporte || reporte.reportanteId !== usuario.id) {
+      return fallo('Ese reporte no es tuyo.');
+    }
+    if (reporte.estado !== 'PENDIENTE') {
+      return fallo('Solo puedes retirar un reporte mientras está pendiente.');
+    }
+    this.reportesRepo.eliminar(reporteId);
+    return exito('Retiraste el reporte.');
+  }
+
+  /** Solo ADMIN: corrige el motivo de una sanción. La acción ya hecha no cambia. */
+  corregirSancion(sancionId: number, motivo: string): Resultado {
+    if (!this.auth.esAdmin()) {
+      return fallo('Solo un administrador puede corregir sanciones.');
+    }
+    const texto = motivo.trim();
+    if (texto.length < LIMITES.motivo.min || texto.length > LIMITES.motivo.max) {
+      return fallo(`El motivo debe tener entre ${LIMITES.motivo.min} y ${LIMITES.motivo.max} caracteres.`);
+    }
+    if (!this.sancionesRepo.actualizar(sancionId, { motivo: texto })) {
+      return fallo('La sanción no existe.');
+    }
+    return exito('Corregiste el motivo de la sanción.');
+  }
+
+  /** Solo ADMIN: borra un registro del historial. No deshace el baneo ni la restauración. */
+  eliminarSancion(sancionId: number): Resultado {
+    if (!this.auth.esAdmin()) {
+      return fallo('Solo un administrador puede borrar sanciones del historial.');
+    }
+    if (!this.sancionesRepo.eliminar(sancionId)) {
+      return fallo('La sanción no existe.');
+    }
+    return exito('La sanción salió del historial. El contenido queda como estaba.');
   }
 
   /** Banea el contenido reportado y marca como resueltos todos sus reportes pendientes. */

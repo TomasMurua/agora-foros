@@ -83,7 +83,7 @@ export class AdminUsuarios {
   protected async eliminar(u: UsuarioAdmin): Promise<void> {
     const ok = await this.confirmacion.confirmar({
       titulo: 'Eliminar cuenta',
-      mensaje: `Vas a eliminar la cuenta de ${u.nombreUsuario}. Sus ${u.temas} temas quedarán publicados. Esta acción no se puede deshacer.`,
+      mensaje: `Vas a eliminar la cuenta de ${u.nombreUsuario}. ${u.temas === 0 ? 'No tiene temas publicados.' : u.temas === 1 ? 'Su tema quedará publicado.' : `Sus ${u.temas} temas quedarán publicados.`} Esta acción no se puede deshacer.`,
       textoConfirmar: 'Eliminar cuenta',
       peligro: true,
     });

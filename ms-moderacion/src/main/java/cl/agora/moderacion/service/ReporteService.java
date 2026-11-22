@@ -1,5 +1,6 @@
 package cl.agora.moderacion.service;
 
+import cl.agora.moderacion.client.ContenidoForo;
 import cl.agora.moderacion.client.ForoClient;
 import cl.agora.moderacion.dto.ReporteCrearRequest;
 import cl.agora.moderacion.dto.ReporteResolverRequest;
@@ -39,7 +40,10 @@ public class ReporteService {
                 req.tipoContenido(), req.contenidoId(), actual.id(), EstadoReporte.PENDIENTE)) {
             throw ApiException.conflicto("Ya tiene un reporte pendiente sobre este contenido");
         }
-        foroClient.obtener(req.tipoContenido(), req.contenidoId(), token);
+        ContenidoForo contenido = foroClient.obtener(req.tipoContenido(), req.contenidoId(), token);
+        if (contenido.autor().equalsIgnoreCase(actual.nombreUsuario())) {
+            throw ApiException.solicitudInvalida("No puede reportar su propio contenido");
+        }
         reporte.setTipoContenido(req.tipoContenido());
         reporte.setContenidoId(req.contenidoId());
         reporte.setMotivo(req.motivo().trim());

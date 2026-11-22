@@ -16,8 +16,14 @@ public record TemaActualizarRequest(
         @Size(min = 5, max = 150, message = "El título debe tener entre 5 y 150 caracteres")
         String titulo,
 
-        @Size(min = 10, max = 4000, message = "El contenido debe tener entre 10 y 4000 caracteres")
+        @Size(min = 20, max = 4000, message = "El contenido debe tener entre 20 y 4000 caracteres")
         String contenido,
 
         EstadoTema estado) {
+
+    /** Quita los espacios del inicio y del final antes de validar los largos. */
+    public TemaActualizarRequest {
+        titulo = Textos.limpiar(titulo);
+        contenido = Textos.limpiar(contenido);
+    }
 }

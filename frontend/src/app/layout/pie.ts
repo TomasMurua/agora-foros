@@ -30,6 +30,7 @@ import { RouterLink } from '@angular/router';
               @if (auth.estaAutenticado()) {
                 <li><a routerLink="/perfil">Mi perfil</a></li>
                 <li><a routerLink="/mis-temas">Mis temas</a></li>
+                <li><a routerLink="/mis-reportes">Mis reportes</a></li>
                 <li><a routerLink="/temas/nuevo">Publicar un tema</a></li>
               } @else {
                 <li><a routerLink="/iniciar-sesion">Iniciar sesión</a></li>

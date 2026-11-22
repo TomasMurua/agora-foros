@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ForoFacade } from '../../../core/facades/foro.facade';
@@ -7,18 +7,19 @@ import { ConfirmacionService } from '../../../core/services/confirmacion.service
 import { NotificacionService } from '../../../core/services/notificacion.service';
 import { EstadoBadge } from '../../../shared/components/estado-badge';
 import { EstadoVacio } from '../../../shared/components/estado-vacio';
+import { PluralPipe } from '../../../shared/pipes/plural.pipe';
 
 /** Página contenedora: temas publicados por la persona con sesión iniciada. */
 @Component({
   selector: 'app-mis-temas',
-  imports: [RouterLink, DatePipe, DecimalPipe, EstadoBadge, EstadoVacio],
+  imports: [RouterLink, DatePipe, EstadoBadge, EstadoVacio, PluralPipe],
   template: `
     <section class="cabecera-pagina">
       <div class="container d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
         <div>
           <p class="eyebrow">Tu actividad</p>
           <h1 class="titulo-pagina">Mis temas</h1>
-          <p class="bajada-pagina mb-0">{{ foro.misTemas().length }} publicados · {{ totalVistas() | number }} vistas en total</p>
+          <p class="bajada-pagina mb-0">{{ foro.misTemas().length | plural: 'tema publicado' : 'temas publicados' }} · {{ totalVistas() | plural: 'vista' : 'vistas' }} en total</p>
         </div>
         <a class="btn btn-primary" routerLink="/temas/nuevo"><i class="bi bi-plus-lg" aria-hidden="true"></i> Publicar tema</a>
       </div>
