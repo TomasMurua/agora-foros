@@ -1,0 +1,37 @@
+# Proxy de entrada con HTTPS automático (Let's Encrypt) para el dominio público de la VM.
+{$DOMINIO} {
+	encode gzip
+
+	@usuarios path /api/auth /api/auth/* /api/usuarios /api/usuarios/* /api/roles /api/roles/*
+	handle @usuarios {
+		reverse_proxy ms-usuarios:8081
+	}
+
+	@foro path /api/categorias /api/categorias/* /api/temas /api/temas/* /api/comentarios /api/comentarios/*
+	handle @foro {
+		reverse_proxy ms-foro:8082
+	}
+
+	@moderacion path /api/normas /api/normas/* /api/reportes /api/reportes/* /api/sanciones /api/sanciones/*
+	handle @moderacion {
+		reverse_proxy ms-moderacion:8083
+	}
+
+	# Estado de cada microservicio, para revisar el despliegue desde el navegador o Postman
+	handle_path /salud/usuarios {
+		rewrite * /actuator/health
+		reverse_proxy ms-usuarios:8081
+	}
+	handle_path /salud/foro {
+		rewrite * /actuator/health
+		reverse_proxy ms-foro:8082
+	}
+	handle_path /salud/moderacion {
+		rewrite * /actuator/health
+		reverse_proxy ms-moderacion:8083
+	}
+
+	handle {
+		reverse_proxy frontend:80
+	}
+}
