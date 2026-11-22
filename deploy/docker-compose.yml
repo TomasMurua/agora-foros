@@ -9,9 +9,11 @@ name: agora-foros
 
 x-microservicio: &microservicio
   restart: unless-stopped
+  # Con el perfil oracle-local esperan al contenedor de Oracle. Con Oracle Cloud ese servicio no se levanta.
   depends_on:
     oracle:
       condition: service_healthy
+      required: false
   mem_limit: 512m
   logging:
     driver: json-file
@@ -31,11 +33,13 @@ x-entorno: &entorno
   JAVA_OPTS: -XX:MaxRAMPercentage=70 -XX:+UseSerialGC -Xss512k
 
 services:
+  # Oracle en un contenedor de la misma VM. Se activa con COMPOSE_PROFILES=oracle-local en deploy/.env.
   oracle:
     image: gvenzl/oracle-free:23-slim-faststart
+    profiles: ["oracle-local"]
     restart: unless-stopped
     environment:
-      ORACLE_PASSWORD: ${ORACLE_PASSWORD:?Defina ORACLE_PASSWORD en deploy/.env}
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-}
       TZ: America/Santiago
     volumes:
       - oracle-datos:/opt/oracle/oradata

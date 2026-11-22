@@ -68,7 +68,7 @@ sequenceDiagram
 
 | Rol | Qué puede hacer |
 |-----|-----------------|
-| `USUARIO` | Publica temas y comentarios, edita o borra lo suyo, reporta contenido y ve sus reportes. |
+| `USUARIO` | Publica temas y comentarios, edita o borra lo suyo, reporta contenido ajeno y ve o retira sus reportes. |
 | `MODERADOR` | Lo mismo que un USUARIO. Además cierra temas, borra contenido ajeno, revisa reportes, banea y restaura temas y comentarios. |
 | `ADMIN` | Lo mismo que un MODERADOR. Además administra usuarios, roles, categorías y normas, y corrige o borra sanciones del historial. |
 
@@ -136,8 +136,9 @@ se pliega, y desde los 1200 px se muestra completo.
 | `/iniciar-sesion`, `/registro`, `/recuperar-contrasena` | Inicio de sesión, registro y recuperación en tres pasos | Sin sesión |
 | `/temas/nuevo`, `/temas/:id/editar`, `/mis-temas` | Publicar y editar temas (solo el autor), lista de temas propios | Con sesión |
 | `/perfil`, `/perfil/editar` | Ver y modificar el perfil, cambiar la contraseña, eliminar la cuenta | Con sesión |
+| `/mis-reportes` | Reportes enviados, en qué quedaron, y retirar los pendientes | Con sesión |
 | `/moderacion` | Reportes pendientes, banear y restaurar temas y comentarios | MODERADOR, ADMIN |
-| `/admin/usuarios`, `/admin/categorias`, `/admin/normas`, `/admin/sanciones` | Administración | ADMIN |
+| `/admin/usuarios`, `/admin/categorias`, `/admin/normas`, `/admin/sanciones` | Administración de cuentas, categorías y normas, e historial de sanciones (corregir el motivo o borrar un registro) | ADMIN |
 
 En el detalle de un tema cada persona ve las acciones que le corresponden: comentar si el tema está abierto, editar o
 cerrar lo propio, reportar lo ajeno, y banear o eliminar si modera. Los guards `authGuard`, `invitadoGuard` y `rolGuard`
@@ -168,7 +169,7 @@ nombre de usuario. El nombre de usuario, el correo, las categorías y las normas
 cd frontend
 npm install
 npm start                    # http://localhost:4200
-npm test -- --watch=false    # 40 tests de validadores, fachadas y guards
+npm test -- --watch=false    # 44 tests de validadores, fachadas, guards y plurales
 npm run build                # dist/agora-web
 ```
 
@@ -190,7 +191,7 @@ evaluación es una versión cerrada. Por eso me sirve más GitFlow: `main` queda
 
 Las ramas de la versión 2.0.0 son `feature/arquetipo`, `feature/foro-baneo`, `feature/servicios-arquetipo`,
 `feature/ms-moderacion`, `feature/postman-moderacion`, `feature/docker-cloud`, `feature/frontend-angular`,
-`docs/readme-v2` y `release/2.0.0`.
+`docs/readme-v2`, `fix/revision-v2` (correcciones después de revisar todo contra lo pedido) y `release/2.0.0`.
 
 ## Requisitos
 
@@ -221,7 +222,7 @@ cd frontend && npm install && npm start       # http://localhost:4200
 Las variables `DB_URL`, `DB_USER` y `DB_PASSWORD` cambian la conexión. `JWT_SECRET` tiene que ser la misma en los tres
 servicios. Sin ella usan una clave de desarrollo y lo avisan en el log. Con el perfil `cloud` esa clave no sirve y el
 servicio no arranca. Para revisar los datos con SQL Developer, conéctate a `localhost:1521`, servicio `FREEPDB1`, con
-`USUARIOS_MS` / `Usuarios_Ms2026`, `FORO_MS` / `Foro_Ms2026` o `MODERACION_MS` / `Moderacion_Ms2026`.
+`USUARIOS_MS` / `AgoraUsr#2026`, `FORO_MS` / `AgoraForo#2026` o `MODERACION_MS` / `AgoraMod#2026`.
 
 ## Despliegue en la nube
 
@@ -230,11 +231,10 @@ descarga: no compila nada. `deploy/docker-compose.yml` levanta Oracle, los tres 
 saca el certificado HTTPS y reparte las rutas por prefijo según el diagrama de arriba. Los microservicios corren con el
 perfil `cloud`, que exige una clave JWT propia.
 
-URL pública: https://agora-foros.eastus2.cloudapp.azure.com
+Con el nombre DNS del paso 1, la URL pública queda en https://agora-foros.eastus2.cloudapp.azure.com. El estado de
+cada microservicio se ve en `/salud/usuarios`, `/salud/foro` y `/salud/moderacion`.
 
-El estado de cada microservicio se ve en `/salud/usuarios`, `/salud/foro` y `/salud/moderacion`.
-
-1. Crear el registry y la VM. Yo usé la región `eastus2`:
+1. Crear el registry y la VM, en este caso en la región `eastus2`:
 
    ```bash
    az group create -n rg-agora-foros -l eastus2
@@ -266,26 +266,32 @@ El estado de cada microservicio se ve en `/salud/usuarios`, `/salud/foro` y `/sa
 
 4. Para actualizar, se publican imágenes nuevas y en la VM se corre `docker compose pull && docker compose up -d`.
 
-La base de datos corre como un contenedor más, con un volumen para que los datos sobrevivan a los reinicios. El puerto
-1521 no queda expuesto a internet. Para revisarla desde la VM:
+Con `COMPOSE_PROFILES=oracle-local` en `deploy/.env`, la base de datos corre como un contenedor más de la VM, con un
+volumen para que los datos sobrevivan a los reinicios. El puerto 1521 no queda expuesto a internet. Para revisarla desde
+la VM:
 
 ```bash
-docker compose exec oracle sqlplus MODERACION_MS/Moderacion_Ms2026@//localhost/FREEPDB1
+docker compose exec oracle sqlplus 'MODERACION_MS/"AgoraMod#2026"@//localhost/FREEPDB1'
 ```
 
-Para usar Oracle Cloud (Autonomous Database), se ejecutan los scripts de `bd/` conectado como ADMIN, se descarga el
-Wallet de la base, se descomprime en `deploy/wallet/` y en `deploy/.env` se cambia la conexión:
+Para usar Oracle Cloud (Autonomous Database):
 
-```
-DB_URL=jdbc:oracle:thin:@<nombre_de_la_base>_high?TNS_ADMIN=/wallet
-```
+1. Crear la base y ejecutar los scripts de `bd/` en orden, conectado como ADMIN (por ejemplo desde Database Actions).
+   `01_crear_esquemas.sql` crea los usuarios en el tablespace por defecto de la base, que en Autonomous es `DATA`, y
+   sus claves cumplen las reglas de Autonomous.
+2. Descargar el Wallet de la base y descomprimirlo en `deploy/wallet/`.
+3. En `deploy/.env`, borrar `COMPOSE_PROFILES`, `ORACLE_PASSWORD` y la `DB_URL` local, y poner la del Wallet:
 
-Los microservicios ya traen `oraclepki` para leer el Wallet y el compose lo monta en `/wallet`. El servicio `oracle`
-del compose deja de ser necesario.
+   ```
+   DB_URL=jdbc:oracle:thin:@<nombre_de_la_base>_high?TNS_ADMIN=/wallet
+   ```
+
+Sin el perfil `oracle-local`, el compose no levanta el contenedor de Oracle y los microservicios se conectan con el
+Wallet, que queda montado en `/wallet`. Ya traen `oraclepki`, la librería que lo lee.
 
 ## Postman
 
-`postman/Agora-Foros.postman_collection.json` tiene 113 solicitudes con 259 pruebas sobre los tres microservicios.
+`postman/Agora-Foros.postman_collection.json` tiene 115 solicitudes con 264 pruebas sobre los tres microservicios.
 Hay dos entornos: `Agora-Foros-local` apunta a los puertos 8081, 8082 y 8083, y `Agora-Foros-nube` apunta a la URL
 pública. Se importan la colección y el entorno, se ejecuta primero la carpeta Autenticación, que guarda los tokens, y
 después cualquier otra. La colección completa también corre en el Collection Runner o con newman:
@@ -401,7 +407,7 @@ Todos los errores vuelven en JSON con esta forma:
 
 | Código | Cuándo aparece |
 |--------|----------------|
-| 400 | Faltan datos o vienen con un formato inválido, o se intenta banear sin indicar la norma |
+| 400 | Faltan datos o vienen con un formato inválido, se intenta banear sin indicar la norma o reportar contenido propio |
 | 401 | No hay token, el token no sirve o la contraseña no coincide |
 | 403 | El rol no tiene permiso o la cuenta está bloqueada |
 | 404 | El recurso no existe, o está baneado y quien consulta no modera |
