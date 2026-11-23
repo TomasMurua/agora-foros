@@ -1,0 +1,77 @@
+@if (usuario(); as u) {
+  <section class="cabecera-perfil">
+    <div class="container">
+      <div class="d-flex flex-column flex-md-row align-items-center align-items-md-end gap-3 gap-md-4 text-center text-md-start">
+        <app-avatar [nombre]="u.nombreCompleto" [color]="u.colorAvatar" tamano="xl" />
+        <div class="flex-grow-1">
+          <span class="badge rol-badge" [class]="'badge rol-badge rol-' + u.rol.toLowerCase()">{{ etiquetaRol[u.rol] }}</span>
+          <h1 class="titulo-pagina mb-0 mt-2">{{ u.nombreCompleto }}</h1>
+          <p class="texto-suave mb-0">&#64;{{ u.nombreUsuario }} · en Ágora desde {{ u.fechaRegistro | date: "d 'de' MMMM y" }}</p>
+        </div>
+        <a class="btn btn-primary" routerLink="/perfil/editar"><i class="bi bi-sliders" aria-hidden="true"></i> Modificar perfil</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="container pb-5">
+    <div class="row g-4">
+      <aside class="col-12 col-md-5 col-lg-4">
+        <div class="panel mb-3">
+          <h2 class="h6 text-uppercase texto-suave">Sobre mí</h2>
+          <p class="mb-3">{{ u.bio || 'Todavía no escribes una presentación. Puedes agregarla en Modificar perfil.' }}</p>
+          <dl class="datos-perfil mb-0">
+            <dt>Correo</dt><dd>{{ u.correo }}</dd>
+            <dt>Rol</dt><dd>{{ etiquetaRol[u.rol] }}</dd>
+          </dl>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-6"><div class="cifra"><span>{{ actividad().temas }}</span>temas</div></div>
+          <div class="col-6"><div class="cifra"><span>{{ actividad().comentarios }}</span>comentarios</div></div>
+        </div>
+        <div class="panel zona-peligro">
+          <h2 class="h6 text-uppercase">Zona de peligro</h2>
+          <p class="small mb-3">Eliminar tu cuenta es definitivo. Tus temas y comentarios quedan publicados con tu nombre de usuario.</p>
+          <button type="button" class="btn btn-outline-danger btn-sm" (click)="abrirEliminacion()"><i class="bi bi-person-x" aria-hidden="true"></i> Eliminar mi cuenta</button>
+        </div>
+      </aside>
+      <section class="col-12 col-md-7 col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h4 mb-0">Mis últimos temas</h2>
+          <a class="enlace-flecha" routerLink="/mis-temas">Ver todos <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+        </div>
+        @if (ultimosTemas().length) {
+          <div class="row g-3">
+            @for (r of ultimosTemas(); track r.tema.id) {
+              <div class="col-12 col-lg-6"><app-tema-card [resumen]="r" [mostrarExtracto]="false" /></div>
+            }
+          </div>
+        } @else {
+          <app-estado-vacio titulo="Aún no publicas temas" texto="Abre una conversación y aparecerá aquí.">
+            <a class="btn btn-primary" routerLink="/temas/nuevo">Publicar un tema</a>
+          </app-estado-vacio>
+        }
+      </section>
+    </div>
+  </div>
+
+  @if (confirmandoEliminacion()) {
+    <app-modal titulo="Eliminar mi cuenta" icono="exclamation-triangle" (cerrar)="confirmandoEliminacion.set(false)">
+      <form [formGroup]="formEliminar" (ngSubmit)="eliminarCuenta()" novalidate>
+        <div class="modal-body">
+          <p>Vas a eliminar la cuenta <strong>{{ u.nombreUsuario }}</strong>. Para confirmar, escribe tu contraseña.</p>
+          @if (error(); as mensaje) {
+            <div class="alert alert-danger py-2" role="alert">{{ mensaje }}</div>
+          }
+          <label for="pe-password" class="form-label">Contraseña</label>
+          <input id="pe-password" type="password" class="form-control" [formControl]="passwordEliminar" required maxlength="20" autocomplete="current-password"
+            [class.is-invalid]="passwordEliminar.invalid && (passwordEliminar.touched || enviado())" />
+          <app-campo-error [control]="passwordEliminar" [enviado]="enviado()" [mensajes]="{ required: 'Escribe tu contraseña para confirmar.' }" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="confirmandoEliminacion.set(false)">Cancelar</button>
+          <button type="submit" class="btn btn-danger" [disabled]="passwordEliminar.invalid && enviado()">Eliminar definitivamente</button>
+        </div>
+      </form>
+    </app-modal>
+  }
+}

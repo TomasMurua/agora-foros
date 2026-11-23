@@ -1,0 +1,68 @@
+import { Usuario } from '../core/models/usuario.model';
+
+/**
+ * Usuarios iniciales. Son los mismos de bd/02_ms_usuarios.sql (mismos ids,
+ * nombres de usuario, correos, roles y fechas de registro).
+ */
+export const USUARIOS_INICIALES: readonly Usuario[] = [
+  {
+    id: 1,
+    nombreUsuario: 'admin',
+    correo: 'admin@agoraforos.cl',
+    password: 'Admin2026!',
+    nombreCompleto: 'Administrador Ágora',
+    rol: 'ADMIN',
+    activo: true,
+    fechaRegistro: '2026-10-20T09:00:00',
+    bio: 'Administro las cuentas, las categorías y las normas del foro.',
+    colorAvatar: '#265077',
+  },
+  {
+    id: 2,
+    nombreUsuario: 'moderador',
+    correo: 'moderador@agoraforos.cl',
+    password: 'Moder2026!',
+    nombreCompleto: 'Ignacio Paredes',
+    rol: 'MODERADOR',
+    activo: true,
+    fechaRegistro: '2026-10-20T09:30:00',
+    bio: 'Reviso los reportes y cuido que las conversaciones sigan las normas.',
+    colorAvatar: '#4f6b3c',
+  },
+  {
+    id: 3,
+    nombreUsuario: 'camila.diaz',
+    correo: 'camila.diaz@correo.cl',
+    password: 'Usuario2026!',
+    nombreCompleto: 'Camila Díaz',
+    rol: 'USUARIO',
+    activo: true,
+    fechaRegistro: '2026-10-21T18:12:00',
+    bio: 'Desarrolladora backend. Corro los fines de semana y juego cooperativo los sábados.',
+    colorAvatar: '#b4472a',
+  },
+  {
+    id: 4,
+    nombreUsuario: 'matias.soto',
+    correo: 'matias.soto@correo.cl',
+    password: 'Usuario2026!',
+    nombreCompleto: 'Matías Soto',
+    rol: 'USUARIO',
+    activo: true,
+    fechaRegistro: '2026-10-22T20:45:00',
+    bio: 'Juego en PC y estoy aprendiendo guitarra eléctrica.',
+    colorAvatar: '#8a5a12',
+  },
+  {
+    id: 5,
+    nombreUsuario: 'fernanda.lagos',
+    correo: 'fernanda.lagos@correo.cl',
+    password: 'Usuario2026!',
+    nombreCompleto: 'Fernanda Lagos',
+    rol: 'USUARIO',
+    activo: true,
+    fechaRegistro: '2026-10-24T11:05:00',
+    bio: 'Fanática de las series de misterio y de la ciencia ficción.',
+    colorAvatar: '#6b3f73',
+  },
+];

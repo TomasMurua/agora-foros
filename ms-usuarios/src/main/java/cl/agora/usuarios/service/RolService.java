@@ -72,7 +72,7 @@ public class RolService {
         }
         long usuarios = usuarioRepository.countByRolId(id);
         if (usuarios > 0) {
-            throw ApiException.conflicto("No se puede eliminar el rol: tiene " + usuarios + " usuario(s) asignado(s)");
+            throw ApiException.conflicto("No se puede eliminar el rol: tiene " + (usuarios == 1 ? "un usuario asignado" : usuarios + " usuarios asignados"));
         }
         rolRepository.delete(rol);
         log.info("Rol {} eliminado", id);

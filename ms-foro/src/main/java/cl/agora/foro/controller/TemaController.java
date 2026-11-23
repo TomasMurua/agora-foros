@@ -3,6 +3,7 @@ package cl.agora.foro.controller;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import cl.agora.foro.dto.BaneoRequest;
 import cl.agora.foro.dto.ComentarioRequest;
 import cl.agora.foro.dto.ComentarioResponse;
 import cl.agora.foro.dto.MensajeResponse;
@@ -52,9 +53,11 @@ public class TemaController {
             @RequestParam(required = false) String q,
             @RequestParam(required = false) Long categoriaId,
             @RequestParam(required = false) String autor,
-            @RequestParam(required = false) EstadoTema estado) {
-        return ResponseEntity.ok(assembler.toCollectionModel(temaService.buscar(q, categoriaId, autor, estado))
-                .add(linkTo(methodOn(TemaController.class).buscar(q, categoriaId, autor, estado)).withSelfRel()));
+            @RequestParam(required = false) EstadoTema estado,
+            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(assembler.toCollectionModel(
+                        temaService.buscar(q, categoriaId, autor, estado, UsuarioActual.desde(jwt)))
+                .add(linkTo(methodOn(TemaController.class).buscar(q, categoriaId, autor, estado, null)).withSelfRel()));
     }
 
     /** Temas mas vistos del foro. */
@@ -65,10 +68,16 @@ public class TemaController {
                 .add(linkTo(methodOn(TemaController.class).populares(limite)).withSelfRel()));
     }
 
-    /** Detalle de un tema (cada consulta suma una visita). */
+    /**
+     * Detalle de un tema. Cada consulta suma una visita, salvo con ?sumarVisita=false
+     * (ms-moderacion lo usa para confirmar que un tema existe antes de aceptar un reporte).
+     */
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<TemaResponse>> visualizar(@PathVariable Long id) {
-        return ResponseEntity.ok(assembler.toModel(temaService.visualizar(id)));
+    public ResponseEntity<EntityModel<TemaResponse>> visualizar(@PathVariable Long id,
+                                                                @RequestParam(required = false) Boolean sumarVisita,
+                                                                @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(assembler.toModel(
+                temaService.visualizar(id, UsuarioActual.desde(jwt), !Boolean.FALSE.equals(sumarVisita))));
     }
 
     @PostMapping
@@ -91,11 +100,21 @@ public class TemaController {
         return ResponseEntity.ok(new MensajeResponse("Tema " + id + " eliminado correctamente"));
     }
 
+    /** Banea (true) o restaura (false) un tema. Lo usa ms-moderacion con el token del moderador. */
+    @PutMapping("/{id}/baneo")
+    public ResponseEntity<EntityModel<TemaResponse>> cambiarBaneo(@PathVariable Long id,
+                                                                  @Valid @RequestBody BaneoRequest req,
+                                                                  @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(assembler.toModel(temaService.cambiarBaneo(id, req.baneado(), UsuarioActual.desde(jwt))));
+    }
+
     @GetMapping("/{id}/comentarios")
-    public ResponseEntity<CollectionModel<EntityModel<ComentarioResponse>>> comentarios(@PathVariable Long id) {
-        return ResponseEntity.ok(comentarioAssembler.toCollectionModel(comentarioService.listarPorTema(id))
-                .add(linkTo(methodOn(TemaController.class).comentarios(id)).withSelfRel())
-                .add(linkTo(methodOn(TemaController.class).visualizar(id)).withRel("tema")));
+    public ResponseEntity<CollectionModel<EntityModel<ComentarioResponse>>> comentarios(@PathVariable Long id,
+                                                                                        @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(comentarioAssembler.toCollectionModel(
+                        comentarioService.listarPorTema(id, UsuarioActual.desde(jwt)))
+                .add(linkTo(methodOn(TemaController.class).comentarios(id, null)).withSelfRel())
+                .add(linkTo(methodOn(TemaController.class).visualizar(id, null, null)).withRel("tema")));
     }
 
     @PostMapping("/{id}/comentarios")

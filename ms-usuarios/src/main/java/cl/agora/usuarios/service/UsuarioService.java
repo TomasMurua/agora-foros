@@ -57,6 +57,8 @@ public class UsuarioService {
             throw ApiException.conflicto("El correo " + correo + " ya está registrado");
         }
 
+        validarQueNoContengaElUsuario(req.password(), nombreUsuario);
+
         Rol rol;
         if (req.rolId() != null) {
             if (actual == null || !actual.esAdmin()) {
@@ -102,6 +104,7 @@ public class UsuarioService {
             usuario.setNombreCompleto(req.nombreCompleto().trim());
         }
         if (req.password() != null) {
+            validarQueNoContengaElUsuario(req.password(), usuario.getNombreUsuario());
             usuario.setPasswordHash(passwordEncoder.encode(req.password()));
         }
         if (req.rolId() != null) {
@@ -134,5 +137,12 @@ public class UsuarioService {
     private Usuario buscarEntidad(Long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> ApiException.noEncontrado("No existe el usuario con id " + id));
+    }
+
+    /** Séptima regla de la contraseña, la misma que valida el frontend. */
+    private static void validarQueNoContengaElUsuario(String password, String nombreUsuario) {
+        if (password.toLowerCase(Locale.ROOT).contains(nombreUsuario.toLowerCase(Locale.ROOT))) {
+            throw ApiException.solicitudInvalida("La contraseña no puede contener el nombre de usuario");
+        }
     }
 }

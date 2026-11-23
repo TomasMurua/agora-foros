@@ -1,0 +1,98 @@
+<section class="cabecera-pagina">
+  <div class="container">
+    <nav aria-label="Ruta de navegación">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="/perfil">Mi perfil</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Modificar perfil</li>
+      </ol>
+    </nav>
+    <h1 class="titulo-pagina">Modificar perfil</h1>
+    <p class="bajada-pagina">Actualiza cómo te ven en el foro y cambia tu contraseña cuando lo necesites.</p>
+  </div>
+</section>
+
+<div class="container pb-5">
+  <div class="row g-4">
+    <div class="col-12 col-lg-7">
+      <form class="panel" [formGroup]="formDatos" (ngSubmit)="guardarDatos()" novalidate aria-labelledby="titulo-datos">
+        <h2 id="titulo-datos" class="h5 mb-3">Datos personales</h2>
+        <div class="d-flex align-items-center gap-3 mb-4">
+          <app-avatar [nombre]="formDatos.controls.nombreCompleto.value" [color]="formDatos.controls.colorAvatar.value" tamano="lg" />
+          <fieldset class="flex-grow-1">
+            <legend class="form-label fs-6 mb-2">Color del avatar</legend>
+            <div class="selector-color">
+              @for (c of colores; track c.valor) {
+                <input type="radio" class="btn-check" name="colorAvatar" formControlName="colorAvatar" [id]="'color-' + c.nombre" [value]="c.valor" />
+                <label class="muestra-color" [for]="'color-' + c.nombre" [style.background-color]="c.valor" [title]="c.nombre">
+                  <span class="visually-hidden">{{ c.nombre }}</span>
+                </label>
+              }
+            </div>
+          </fieldset>
+        </div>
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <label for="p-nombre" class="form-label">Nombre completo</label>
+            <input id="p-nombre" type="text" class="form-control" formControlName="nombreCompleto" required
+              [attr.minlength]="limites.nombrePersona.min" [attr.maxlength]="limites.nombrePersona.max" [attr.pattern]="patrones.nombrePersona"
+              autocomplete="name" [class.is-invalid]="invalidoDatos('nombreCompleto')" />
+            <app-campo-error [control]="formDatos.controls.nombreCompleto" [enviado]="enviadoDatos()" />
+          </div>
+          <div class="col-12 col-md-6">
+            <label for="p-correo" class="form-label">Correo</label>
+            <input id="p-correo" type="email" class="form-control" formControlName="correo" required
+              [attr.maxlength]="limites.correo.max" autocomplete="email" [class.is-invalid]="invalidoDatos('correo')" />
+            <app-campo-error [control]="formDatos.controls.correo" [enviado]="enviadoDatos()" [mensajes]="{ yaExiste: 'Ese correo ya lo usa otra cuenta.' }" />
+          </div>
+          <div class="col-12">
+            <label for="p-usuario" class="form-label">Nombre de usuario</label>
+            <input id="p-usuario" type="text" class="form-control" [value]="auth.usuarioActual()?.nombreUsuario" disabled readonly aria-describedby="p-usuario-ayuda" />
+            <div id="p-usuario-ayuda" class="form-text">El nombre de usuario no se puede cambiar.</div>
+          </div>
+          <div class="col-12">
+            <label for="p-bio" class="form-label">Sobre mí <span class="texto-suave">(opcional)</span></label>
+            <textarea id="p-bio" class="form-control" rows="4" formControlName="bio" [attr.maxlength]="limites.bio.max"
+              placeholder="Cuenta en pocas líneas qué te interesa." [class.is-invalid]="invalidoDatos('bio')"></textarea>
+            <div class="d-flex justify-content-between gap-2">
+              <app-campo-error [control]="formDatos.controls.bio" [enviado]="enviadoDatos()" />
+              <app-contador-caracteres class="ms-auto" [control]="formDatos.controls.bio" [maximo]="limites.bio.max" />
+            </div>
+          </div>
+        </div>
+        <div class="d-flex flex-column-reverse flex-sm-row justify-content-end gap-2 mt-4">
+          <a class="btn btn-outline-secondary" routerLink="/perfil">Volver al perfil</a>
+          <button type="submit" class="btn btn-primary" [disabled]="formDatos.invalid && enviadoDatos()">Guardar cambios</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <form class="panel" [formGroup]="formPassword" (ngSubmit)="cambiarPassword()" novalidate aria-labelledby="titulo-password">
+        <h2 id="titulo-password" class="h5 mb-3">Cambiar contraseña</h2>
+        @if (errorPassword(); as mensaje) {
+          <div class="alert alert-danger py-2" role="alert">{{ mensaje }}</div>
+        }
+        <div class="mb-3">
+          <label for="cp-actual" class="form-label">Contraseña actual</label>
+          <input id="cp-actual" type="password" class="form-control" formControlName="actual" required maxlength="20"
+            autocomplete="current-password" [class.is-invalid]="invalidoPassword('actual')" />
+          <app-campo-error [control]="formPassword.controls.actual" [enviado]="enviadoPassword()" [mensajes]="{ required: 'Ingresa tu contraseña actual.' }" />
+        </div>
+        <div class="mb-3">
+          <label for="cp-nueva" class="form-label">Nueva contraseña</label>
+          <input id="cp-nueva" type="password" class="form-control" formControlName="nueva" required minlength="8" maxlength="20"
+            autocomplete="new-password" aria-describedby="reglas-perfil" [class.is-invalid]="invalidoPassword('nueva')" />
+          <app-campo-error [control]="formPassword.controls.nueva" [enviado]="enviadoPassword()" />
+        </div>
+        <app-checklist-password idLista="reglas-perfil" [control]="formPassword.controls.nueva" [nombreUsuario]="auth.usuarioActual()?.nombreUsuario ?? ''" />
+        <div class="mb-4 mt-3">
+          <label for="cp-confirmacion" class="form-label">Repite la nueva contraseña</label>
+          <input id="cp-confirmacion" type="password" class="form-control" formControlName="confirmacion" required maxlength="20"
+            autocomplete="new-password" [class.is-invalid]="invalidoPassword('confirmacion')" />
+          <app-campo-error [control]="formPassword.controls.confirmacion" [enviado]="enviadoPassword()" />
+        </div>
+        <button type="submit" class="btn btn-primary w-100" [disabled]="formPassword.invalid && enviadoPassword()">Cambiar contraseña</button>
+      </form>
+    </div>
+  </div>
+</div>

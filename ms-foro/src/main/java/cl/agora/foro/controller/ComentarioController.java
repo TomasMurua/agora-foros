@@ -1,5 +1,6 @@
 package cl.agora.foro.controller;
 
+import cl.agora.foro.dto.BaneoRequest;
 import cl.agora.foro.dto.ComentarioRequest;
 import cl.agora.foro.dto.ComentarioResponse;
 import cl.agora.foro.dto.MensajeResponse;
@@ -30,8 +31,17 @@ public class ComentarioController {
     private final ComentarioModelAssembler assembler;
 
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<ComentarioResponse>> obtener(@PathVariable Long id) {
-        return ResponseEntity.ok(assembler.toModel(comentarioService.obtener(id)));
+    public ResponseEntity<EntityModel<ComentarioResponse>> obtener(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(assembler.toModel(comentarioService.obtener(id, UsuarioActual.desde(jwt))));
+    }
+
+    /** Banea (true) o restaura (false) un comentario. Lo usa ms-moderacion con el token del moderador. */
+    @PutMapping("/{id}/baneo")
+    public ResponseEntity<EntityModel<ComentarioResponse>> cambiarBaneo(@PathVariable Long id,
+                                                                        @Valid @RequestBody BaneoRequest req,
+                                                                        @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(assembler.toModel(
+                comentarioService.cambiarBaneo(id, req.baneado(), UsuarioActual.desde(jwt))));
     }
 
     @PutMapping("/{id}")

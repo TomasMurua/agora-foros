@@ -1,12 +1,14 @@
 package cl.agora.foro.model;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
@@ -36,8 +38,14 @@ public class Comentario {
     @Column(name = "AUTOR", nullable = false, length = 30)
     private String autor;
 
-    @Column(name = "CONTENIDO", nullable = false, length = 2000)
+    @Lob
+    @Column(name = "CONTENIDO", nullable = false)
     private String contenido;
+
+    /** Lo marca ms-moderacion cuando el comentario no cumple una norma del foro. */
+    @Convert(converter = BooleanNumeroConverter.class)
+    @Column(name = "BANEADO", nullable = false)
+    private Boolean baneado = Boolean.FALSE;
 
     @Column(name = "FECHA_CREACION", nullable = false)
     private LocalDateTime fechaCreacion;
@@ -50,5 +58,12 @@ public class Comentario {
         if (fechaCreacion == null) {
             fechaCreacion = LocalDateTime.now();
         }
+        if (baneado == null) {
+            baneado = Boolean.FALSE;
+        }
+    }
+
+    public boolean estaBaneado() {
+        return Boolean.TRUE.equals(baneado);
     }
 }

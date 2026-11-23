@@ -1,0 +1,110 @@
+# Despliegue de Ágora Foros en la nube (una VM con Docker).
+# Las imágenes se descargan del Container Registry; ninguna se construye en la VM.
+# Variables en deploy/.env (ver .env.example). Caddy publica todo en https://$DOMINIO:
+#   /                      -> frontend Angular
+#   /api/auth, /api/usuarios, /api/roles            -> ms-usuarios
+#   /api/categorias, /api/temas, /api/comentarios   -> ms-foro
+#   /api/normas, /api/reportes, /api/sanciones      -> ms-moderacion
+name: agora-foros
+
+x-microservicio: &microservicio
+  restart: unless-stopped
+  # Con el perfil oracle-local esperan al contenedor de Oracle. Con Oracle Cloud ese servicio no se levanta.
+  depends_on:
+    oracle:
+      condition: service_healthy
+      required: false
+  mem_limit: 512m
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+x-entorno: &entorno
+  SPRING_PROFILES_ACTIVE: cloud
+  DB_URL: ${DB_URL:-jdbc:oracle:thin:@//oracle:1521/FREEPDB1}
+  TNS_ADMIN: /wallet
+  JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET en deploy/.env}
+  CORS_ORIGENES: https://${DOMINIO}
+  SERVER_FORWARD_HEADERS_STRATEGY: framework
+  LOG_NIVEL: INFO
+  TZ: America/Santiago
+  JAVA_OPTS: -XX:MaxRAMPercentage=70 -XX:+UseSerialGC -Xss512k
+
+services:
+  # Oracle en un contenedor de la misma VM. Se activa con COMPOSE_PROFILES=oracle-local en deploy/.env.
+  oracle:
+    image: gvenzl/oracle-free:23-slim-faststart
+    profiles: ["oracle-local"]
+    restart: unless-stopped
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-}
+      TZ: America/Santiago
+    volumes:
+      - oracle-datos:/opt/oracle/oradata
+      - ../bd:/opt/agora/bd:ro
+      - ../docker/initdb:/container-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  ms-usuarios:
+    <<: *microservicio
+    image: ${REGISTRY}/agora-foros/ms-usuarios:${TAG:-2.0.0}
+    environment:
+      <<: *entorno
+      DB_USER: ${DB_USER_USUARIOS:-USUARIOS_MS}
+      DB_PASSWORD: ${DB_PASSWORD_USUARIOS:-AgoraUsr#2026}
+    volumes:
+      - ./wallet:/wallet:ro
+
+  ms-foro:
+    <<: *microservicio
+    image: ${REGISTRY}/agora-foros/ms-foro:${TAG:-2.0.0}
+    environment:
+      <<: *entorno
+      DB_USER: ${DB_USER_FORO:-FORO_MS}
+      DB_PASSWORD: ${DB_PASSWORD_FORO:-AgoraForo#2026}
+    volumes:
+      - ./wallet:/wallet:ro
+
+  ms-moderacion:
+    <<: *microservicio
+    image: ${REGISTRY}/agora-foros/ms-moderacion:${TAG:-2.0.0}
+    environment:
+      <<: *entorno
+      DB_USER: ${DB_USER_MODERACION:-MODERACION_MS}
+      DB_PASSWORD: ${DB_PASSWORD_MODERACION:-AgoraMod#2026}
+      FORO_URL: http://ms-foro:8082
+      FORO_URL_PUBLICA: https://${DOMINIO}
+    volumes:
+      - ./wallet:/wallet:ro
+
+  frontend:
+    image: ${REGISTRY}/agora-foros/frontend:${TAG:-2.0.0}
+    restart: unless-stopped
+    mem_limit: 64m
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    depends_on:
+      - frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMINIO: ${DOMINIO:?Defina DOMINIO en deploy/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-datos:/data
+      - caddy-config:/config
+
+volumes:
+  oracle-datos:
+  caddy-datos:
+  caddy-config:

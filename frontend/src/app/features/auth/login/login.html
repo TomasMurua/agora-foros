@@ -1,0 +1,56 @@
+<div class="container py-4 py-lg-5">
+  <div class="auth-tarjeta row g-0">
+    <div class="col-12 col-md-5 auth-lado d-none d-md-flex">
+      <img src="ilustraciones/bienvenida.svg" alt="" width="280" height="240" />
+      <h2 class="h4 mt-4">Qué bueno verte de vuelta</h2>
+      <p class="mb-0">Retoma las conversaciones que sigues y revisa quién respondió tus temas.</p>
+    </div>
+    <div class="col-12 col-md-7 auth-cuerpo">
+      <h1 class="titulo-pagina h2">Iniciar sesión</h1>
+      <p class="texto-suave">¿Aún no tienes cuenta? <a routerLink="/registro">Crea una aquí</a>.</p>
+
+      @if (error(); as mensaje) {
+        <div class="alert alert-danger d-flex gap-2" role="alert">
+          <i class="bi bi-exclamation-octagon" aria-hidden="true"></i><span>{{ mensaje }}</span>
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="ingresar()" novalidate>
+        <div class="mb-3">
+          <label for="l-identificador" class="form-label">Nombre de usuario o correo</label>
+          <input id="l-identificador" type="text" class="form-control" formControlName="identificador" required
+            minlength="3" maxlength="120" autocomplete="username" placeholder="camila.diaz o camila.diaz@correo.cl"
+            [class.is-invalid]="invalido('identificador')" />
+          <app-campo-error [control]="form.controls.identificador" [enviado]="enviado()" [mensajes]="{ required: 'Ingresa tu nombre de usuario o tu correo.' }" />
+        </div>
+        <div class="mb-2">
+          <label for="l-password" class="form-label">Contraseña</label>
+          <div class="input-group">
+            <input id="l-password" [type]="verPassword() ? 'text' : 'password'" class="form-control" formControlName="password" required
+              maxlength="20" autocomplete="current-password" [class.is-invalid]="invalido('password')" />
+            <button type="button" class="btn btn-outline-secondary" (click)="verPassword.set(!verPassword())"
+              [attr.aria-label]="verPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+              <i class="bi" [class.bi-eye]="!verPassword()" [class.bi-eye-slash]="verPassword()" aria-hidden="true"></i>
+            </button>
+          </div>
+          <app-campo-error [control]="form.controls.password" [enviado]="enviado()" [mensajes]="{ required: 'Ingresa tu contraseña.' }" />
+        </div>
+        <div class="text-end mb-4">
+          <a routerLink="/recuperar-contrasena" class="small">¿Olvidaste tu contraseña?</a>
+        </div>
+        <button type="submit" class="btn btn-primary w-100 btn-lg" [disabled]="form.invalid && enviado()">Entrar</button>
+      </form>
+
+      <div class="cuentas-demo mt-4">
+        <p class="small fw-semibold mb-2"><i class="bi bi-person-badge" aria-hidden="true"></i> Cuentas de prueba</p>
+        <div class="d-flex flex-wrap gap-2">
+          @for (c of cuentasDemo; track c.usuario) {
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="usarCuenta(c.usuario, c.password)">
+              {{ c.usuario }} <span class="texto-suave">· {{ c.rol }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

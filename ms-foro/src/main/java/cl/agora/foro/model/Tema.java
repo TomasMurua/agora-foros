@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
@@ -42,7 +43,8 @@ public class Tema {
     @Column(name = "TITULO", nullable = false, length = 150)
     private String titulo;
 
-    @Column(name = "CONTENIDO", nullable = false, length = 4000)
+    @Lob
+    @Column(name = "CONTENIDO", nullable = false)
     private String contenido;
 
     @Enumerated(EnumType.STRING)
@@ -57,6 +59,10 @@ public class Tema {
 
     @Column(name = "FECHA_ACTUALIZACION")
     private LocalDateTime fechaActualizacion;
+
+    public boolean estaBaneado() {
+        return estado == EstadoTema.BANEADO;
+    }
 
     @PrePersist
     void antesDeGuardar() {

@@ -20,6 +20,10 @@ public class ApiException extends RuntimeException {
         return new ApiException(HttpStatus.NOT_FOUND, mensaje);
     }
 
+    public static ApiException solicitudInvalida(String mensaje) {
+        return new ApiException(HttpStatus.BAD_REQUEST, mensaje);
+    }
+
     public static ApiException conflicto(String mensaje) {
         return new ApiException(HttpStatus.CONFLICT, mensaje);
     }

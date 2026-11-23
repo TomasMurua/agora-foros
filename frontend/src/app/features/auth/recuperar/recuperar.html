@@ -1,0 +1,93 @@
+<div class="container py-4 py-lg-5">
+  <div class="auth-tarjeta row g-0">
+    <div class="col-12 col-md-5 auth-lado d-none d-md-flex">
+      <img src="ilustraciones/llave.svg" alt="" width="260" height="220" />
+      <h2 class="h4 mt-4">Recupera el acceso</h2>
+      <p class="mb-0">Te enviamos un código de 6 dígitos al correo de tu cuenta. Con él eliges una contraseña nueva.</p>
+    </div>
+    <div class="col-12 col-md-7 auth-cuerpo">
+      <h1 class="titulo-pagina h2">Recuperar contraseña</h1>
+
+      <ol class="pasos" aria-label="Pasos de la recuperación">
+        @for (p of pasos; track p.numero) {
+          <li [class.activo]="paso() === p.numero" [class.hecho]="paso() > p.numero" [attr.aria-current]="paso() === p.numero ? 'step' : null">
+            <span class="paso-numero">
+              @if (paso() > p.numero) { <i class="bi bi-check-lg" aria-hidden="true"></i> } @else { {{ p.numero }} }
+            </span>
+            <span class="paso-nombre">{{ p.nombre }}</span>
+          </li>
+        }
+      </ol>
+
+      @if (error(); as mensaje) {
+        <div class="alert alert-danger d-flex gap-2" role="alert">
+          <i class="bi bi-exclamation-octagon" aria-hidden="true"></i><span>{{ mensaje }}</span>
+        </div>
+      }
+
+      @switch (paso()) {
+        @case (1) {
+          <form [formGroup]="formCorreo" (ngSubmit)="enviarCorreo()" novalidate>
+            <p class="texto-suave">Escribe el correo con el que te registraste.</p>
+            <div class="mb-4">
+              <label for="rc-correo" class="form-label">Correo</label>
+              <input id="rc-correo" type="email" class="form-control" formControlName="correo" required
+                [attr.maxlength]="limites.correo.max" autocomplete="email" placeholder="nombre@correo.cl"
+                [class.is-invalid]="invalido(formCorreo.controls.correo)" />
+              <app-campo-error [control]="formCorreo.controls.correo" [enviado]="enviado()" />
+            </div>
+            <button type="submit" class="btn btn-primary w-100 btn-lg" [disabled]="formCorreo.invalid && enviado()">Enviar código</button>
+          </form>
+        }
+        @case (2) {
+          @if (aviso(); as a) {
+            <div class="alert aviso-correo" role="status">
+              <div class="d-flex gap-3">
+                <i class="bi bi-envelope-paper fs-3" aria-hidden="true"></i>
+                <div>
+                  <strong class="d-block">Simulación del correo</strong>
+                  <span class="small">{{ a.mensaje }} Como esta demo no tiene servidor de correo, el código es:</span>
+                  <span class="codigo-simulado" aria-label="Código de verificación">{{ a.codigo }}</span>
+                </div>
+              </div>
+            </div>
+          }
+          <form [formGroup]="formCodigo" (ngSubmit)="verificar()" novalidate>
+            <div class="mb-4">
+              <label for="rc-codigo" class="form-label">Código de verificación</label>
+              <input id="rc-codigo" type="text" inputmode="numeric" class="form-control form-control-lg codigo-input" formControlName="codigo" required
+                minlength="6" maxlength="6" [attr.pattern]="patrones.codigo" autocomplete="one-time-code" placeholder="000000"
+                [class.is-invalid]="invalido(formCodigo.controls.codigo)" />
+              <app-campo-error [control]="formCodigo.controls.codigo" [enviado]="enviado()" [mensajes]="{ minlength: 'El código tiene 6 dígitos.' }" />
+            </div>
+            <div class="d-flex flex-column flex-sm-row gap-2">
+              <button type="button" class="btn btn-outline-secondary" (click)="reenviar()">Enviar otro código</button>
+              <button type="submit" class="btn btn-primary flex-grow-1" [disabled]="formCodigo.invalid && enviado()">Verificar código</button>
+            </div>
+          </form>
+        }
+        @case (3) {
+          <form [formGroup]="formPassword" (ngSubmit)="guardar()" novalidate>
+            <div class="mb-3">
+              <label for="rc-password" class="form-label">Nueva contraseña</label>
+              <input id="rc-password" type="password" class="form-control" formControlName="password" required
+                minlength="8" maxlength="20" autocomplete="new-password" aria-describedby="reglas-recuperar"
+                [class.is-invalid]="invalido(formPassword.controls.password)" />
+              <app-campo-error [control]="formPassword.controls.password" [enviado]="enviado()" />
+            </div>
+            <app-checklist-password idLista="reglas-recuperar" [control]="formPassword.controls.password" [nombreUsuario]="nombreUsuario()" />
+            <div class="mb-4 mt-3">
+              <label for="rc-confirmacion" class="form-label">Repite la contraseña</label>
+              <input id="rc-confirmacion" type="password" class="form-control" formControlName="confirmacion" required
+                maxlength="20" autocomplete="new-password" [class.is-invalid]="invalido(formPassword.controls.confirmacion)" />
+              <app-campo-error [control]="formPassword.controls.confirmacion" [enviado]="enviado()" />
+            </div>
+            <button type="submit" class="btn btn-primary w-100 btn-lg" [disabled]="formPassword.invalid && enviado()">Guardar contraseña</button>
+          </form>
+        }
+      }
+
+      <p class="mt-4 mb-0 small text-center"><a routerLink="/iniciar-sesion"><i class="bi bi-arrow-left" aria-hidden="true"></i> Volver a iniciar sesión</a></p>
+    </div>
+  </div>
+</div>

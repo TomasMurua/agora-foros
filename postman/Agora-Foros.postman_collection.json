@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "394d9bbd-fc4d-424e-9827-5f01479531a3",
     "name": "Agora Foros",
-    "description": "Pruebas de los microservicios ms-usuarios (puerto 8081) y ms-foro (puerto 8082). Ejecutar las carpetas en orden: primero Autenticación, que guarda los tokens.",
+    "description": "Pruebas de los microservicios ms-usuarios (puerto 8081), ms-foro (puerto 8082) y ms-moderacion (puerto 8083). Ejecutar las carpetas en orden: primero Autenticación, que guarda los tokens. Para la nube, seleccionar el entorno Agora Foros - Nube.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -607,7 +607,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"nombreUsuario\": \"javiera.munoz\",\n  \"correo\": \"javiera.munoz@correo.cl\",\n  \"password\": \"Foro2026x\",\n  \"nombreCompleto\": \"Javiera Muñoz\"\n}",
+                  "raw": "{\n  \"nombreUsuario\": \"javiera.munoz\",\n  \"correo\": \"javiera.munoz@correo.cl\",\n  \"password\": \"Foro2026x!\",\n  \"nombreCompleto\": \"Javiera Muñoz\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -699,7 +699,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"nombreUsuario\": \"javiera.munoz\",\n  \"correo\": \"otra@correo.cl\",\n  \"password\": \"Foro2026x\",\n  \"nombreCompleto\": \"Repetida\"\n}",
+                  "raw": "{\n  \"nombreUsuario\": \"javiera.munoz\",\n  \"correo\": \"otra@correo.cl\",\n  \"password\": \"Foro2026x!\",\n  \"nombreCompleto\": \"Repetida\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -747,7 +747,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"usuario\": \"javiera.munoz\",\n  \"password\": \"Foro2026x\"\n}",
+                  "raw": "{\n  \"usuario\": \"javiera.munoz\",\n  \"password\": \"Foro2026x!\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1286,7 +1286,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"usuario\": \"javiera.munoz\",\n  \"password\": \"Foro2026x\"\n}",
+                  "raw": "{\n  \"usuario\": \"javiera.munoz\",\n  \"password\": \"Foro2026x!\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -2871,6 +2871,2681 @@
           ]
         }
       ]
+    },
+    {
+      "name": "ms-moderacion",
+      "description": "Normas del foro, reportes de usuarios y sanciones (banear y restaurar). Necesita los tokens de la carpeta Autenticación de ms-usuarios. Al final borra los reportes y sanciones que creó, así la base queda como estaba.",
+      "item": [
+        {
+          "name": "Normas",
+          "item": [
+            {
+              "name": "Listar normas (público)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Hay al menos 5 normas\", function () { pm.expect(pm.response.json()._embedded.normas.length).to.be.at.least(5); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/normas",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "normas"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Listar normas activas",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Todas están activas\", function () { pm.response.json()._embedded.normas.forEach(n => pm.expect(n.activa).to.eql(true)); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/normas?soloActivas=true",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "normas"
+                  ],
+                  "query": [
+                    {
+                      "key": "soloActivas",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Obtener norma",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Es la norma N1\", function () { pm.expect(pm.response.json().codigo).to.eql(\"N1\"); });",
+                      "pm.test(\"Trae enlaces HATEOAS\", function () { pm.expect(pm.response.json()._links.self).to.exist; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/normas/1",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "normas",
+                    "1"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Obtener norma inexistente (404)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 404\", function () { pm.response.to.have.status(404); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/normas/9999",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "normas",
+                    "9999"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Crear norma (ADMIN)",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.collectionVariables.set(\"codigoNorma\", \"N\" + (100 + Math.floor(Math.random() * 900)));"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 201) { pm.collectionVariables.set(\"nuevaNormaId\", pm.response.json().id); }",
+                      "pm.test(\"Queda activa\", function () { pm.expect(pm.response.json().activa).to.eql(true); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/normas",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "normas"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"codigo\": \"{{codigoNorma}}\",\n  \"titulo\": \"Sin trampas en torneos\",\n  \"descripcion\": \"No publicar hacks, bots ni formas de hacer trampa en torneos de la comunidad.\",\n  \"gravedad\": \"MEDIA\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Crear norma con código repetido (409)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 409\", function () { pm.response.to.have.status(409); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/normas",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "normas"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"codigo\": \"N1\",\n  \"titulo\": \"Norma repetida\",\n  \"descripcion\": \"Esta norma usa un código que ya existe.\",\n  \"gravedad\": \"BAJA\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Crear norma con datos inválidos (400)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Detalla los campos con error\", function () { pm.expect(pm.response.json().detalles).to.have.property(\"codigo\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/normas",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "normas"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"codigo\": \"X1\",\n  \"titulo\": \"abc\",\n  \"descripcion\": \"corta\",\n  \"gravedad\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Crear norma como USUARIO (403)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/normas",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "normas"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"codigo\": \"N99\",\n  \"titulo\": \"Norma de usuario\",\n  \"descripcion\": \"Un usuario no puede crear normas.\",\n  \"gravedad\": \"BAJA\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Desactivar norma (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Quedó desactivada y con gravedad ALTA\", function () { pm.expect(pm.response.json().activa).to.eql(false); pm.expect(pm.response.json().gravedad).to.eql(\"ALTA\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/normas/{{nuevaNormaId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "normas",
+                    "{{nuevaNormaId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"codigo\": \"{{codigoNorma}}\",\n  \"titulo\": \"Sin trampas en torneos\",\n  \"descripcion\": \"No publicar hacks, bots ni formas de hacer trampa en torneos de la comunidad.\",\n  \"gravedad\": \"ALTA\",\n  \"activa\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar norma con reportes (409)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 409\", function () { pm.response.to.have.status(409); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/normas/1",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "normas",
+                    "1"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar norma (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/normas/{{nuevaNormaId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "normas",
+                    "{{nuevaNormaId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reportes",
+          "item": [
+            {
+              "name": "Publicar tema que se va a moderar (camila.diaz)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 201) { pm.collectionVariables.set(\"temaModerarId\", pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"categoriaId\": 2,\n  \"titulo\": \"Vendo monedas del juego a buen precio\",\n  \"contenido\": \"Tengo monedas y objetos raros para vender. Escríbanme por mensaje privado para coordinar el pago.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Comentar un tema (matias.soto)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 201) { pm.collectionVariables.set(\"comentarioModerarId\", pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/1/comentarios",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "1",
+                    "comentarios"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contenido\": \"Comentario de prueba que después se va a banear y restaurar.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenMatias}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Reportar tema (matias.soto)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 201) { pm.collectionVariables.set(\"reporteTemaId\", pm.response.json().id); }",
+                      "pm.test(\"Queda PENDIENTE\", function () { pm.expect(pm.response.json().estado).to.eql(\"PENDIENTE\"); });",
+                      "pm.test(\"Quien reporta sale del token\", function () { pm.expect(pm.response.json().reportadoPor).to.eql(\"matias.soto\"); });",
+                      "pm.test(\"Enlaza al contenido en ms-foro\", function () { pm.expect(pm.response.json()._links.contenido.href).to.include(\"/api/temas/\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoContenido\": \"TEMA\",\n  \"contenidoId\": {{temaModerarId}},\n  \"normaId\": 2,\n  \"motivo\": \"Es una venta de monedas, no corresponde al foro.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenMatias}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Reportar comentario (camila.diaz)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 201) { pm.collectionVariables.set(\"reporteComentarioId\", pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoContenido\": \"COMENTARIO\",\n  \"contenidoId\": {{comentarioModerarId}},\n  \"normaId\": 1,\n  \"motivo\": \"Me parece un comentario fuera de lugar.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Reportar contenido propio (400)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Explica el motivo\", function () { pm.expect(pm.response.json().mensaje).to.include(\"propio contenido\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoContenido\": \"TEMA\",\n  \"contenidoId\": {{temaModerarId}},\n  \"normaId\": 2,\n  \"motivo\": \"Intento reportar mi propio tema.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Reportar lo mismo otra vez (409)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 409\", function () { pm.response.to.have.status(409); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoContenido\": \"COMENTARIO\",\n  \"contenidoId\": {{comentarioModerarId}},\n  \"normaId\": 1,\n  \"motivo\": \"Lo reporto de nuevo por si acaso.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Reportar contenido inexistente (404)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 404\", function () { pm.response.to.have.status(404); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoContenido\": \"TEMA\",\n  \"contenidoId\": 99999,\n  \"normaId\": 1,\n  \"motivo\": \"Este tema no existe en el foro.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Reportar con datos inválidos (400)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoContenido\": \"TEMA\",\n  \"contenidoId\": -1,\n  \"normaId\": null,\n  \"motivo\": \"corto\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Reportar sin sesión (401)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 401\", function () { pm.response.to.have.status(401); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoContenido\": \"TEMA\",\n  \"contenidoId\": 1,\n  \"normaId\": 1,\n  \"motivo\": \"Intento reportar sin iniciar sesión.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Mis reportes (camila.diaz)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Solo trae reportes de camila.diaz\", function () { pm.response.json()._embedded.reportes.forEach(r => pm.expect(r.reportadoPor).to.eql(\"camila.diaz\")); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes/mios",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes",
+                    "mios"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Bandeja de reportes como USUARIO (403)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Reporte ajeno como USUARIO (403)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes/{{reporteTemaId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes",
+                    "{{reporteTemaId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Bandeja de reportes pendientes (MODERADOR)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Todos están pendientes\", function () { pm.response.json()._embedded.reportes.forEach(r => pm.expect(r.estado).to.eql(\"PENDIENTE\")); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes?estado=PENDIENTE",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes"
+                  ],
+                  "query": [
+                    {
+                      "key": "estado",
+                      "value": "PENDIENTE"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Descartar reporte (MODERADOR)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Queda DESCARTADO por el moderador\", function () { pm.expect(pm.response.json().estado).to.eql(\"DESCARTADO\"); pm.expect(pm.response.json().resueltoPor).to.eql(\"moderador\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes/{{reporteComentarioId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes",
+                    "{{reporteComentarioId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"estado\": \"DESCARTADO\",\n  \"observacion\": \"El comentario cumple las normas del foro.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Revisar un reporte ya cerrado (409)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 409\", function () { pm.response.to.have.status(409); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes/{{reporteComentarioId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes",
+                    "{{reporteComentarioId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"estado\": \"RESUELTO\",\n  \"observacion\": \"Segundo intento.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sanciones",
+          "item": [
+            {
+              "name": "Banear sin norma (400)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoContenido\": \"TEMA\",\n  \"contenidoId\": {{temaModerarId}},\n  \"accion\": \"BANEAR\",\n  \"motivo\": \"Falta indicar la norma.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Banear como USUARIO (403)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoContenido\": \"TEMA\",\n  \"contenidoId\": 1,\n  \"accion\": \"BANEAR\",\n  \"normaId\": 1,\n  \"motivo\": \"Un usuario no puede banear.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Banear tema con su reporte (MODERADOR)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 201) { pm.collectionVariables.set(\"sancionTemaId\", pm.response.json().id); }",
+                      "pm.test(\"ms-foro confirma el baneo\", function () { pm.expect(pm.response.json().resultado).to.include(\"baneado\"); });",
+                      "pm.test(\"Queda el moderador del token\", function () { pm.expect(pm.response.json().moderador).to.eql(\"moderador\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoContenido\": \"TEMA\",\n  \"contenidoId\": {{temaModerarId}},\n  \"accion\": \"BANEAR\",\n  \"normaId\": 2,\n  \"motivo\": \"Venta de monedas del juego: publicidad no permitida.\",\n  \"reporteId\": {{reporteTemaId}}\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "El reporte del tema quedó RESUELTO",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Estado RESUELTO\", function () { pm.expect(pm.response.json().estado).to.eql(\"RESUELTO\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes/{{reporteTemaId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes",
+                    "{{reporteTemaId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Tema baneado oculto para USUARIO (404)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 404\", function () { pm.response.to.have.status(404); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/{{temaModerarId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "{{temaModerarId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenMatias}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "La autora no puede borrar su tema baneado (404)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 404\", function () { pm.response.to.have.status(404); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/{{temaModerarId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "{{temaModerarId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Tema baneado visible para MODERADOR",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Estado BANEADO\", function () { pm.expect(pm.response.json().estado).to.eql(\"BANEADO\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/{{temaModerarId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "{{temaModerarId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "La búsqueda pública no muestra el tema baneado",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"El tema no aparece\", function () { const ids = pm.response.json()._embedded.temas.map(t => t.id); pm.expect(ids).to.not.include(pm.collectionVariables.get(\"temaModerarId\")); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Comentar tema baneado (409)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 409\", function () { pm.response.to.have.status(409); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/{{temaModerarId}}/comentarios",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "{{temaModerarId}}",
+                    "comentarios"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contenido\": \"Intento comentar un tema baneado.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Banear un tema ya baneado (409)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 409\", function () { pm.response.to.have.status(409); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoContenido\": \"TEMA\",\n  \"contenidoId\": {{temaModerarId}},\n  \"accion\": \"BANEAR\",\n  \"normaId\": 2,\n  \"motivo\": \"Segundo baneo del mismo tema.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Banear comentario inexistente (404)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 404\", function () { pm.response.to.have.status(404); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoContenido\": \"COMENTARIO\",\n  \"contenidoId\": 99999,\n  \"accion\": \"BANEAR\",\n  \"normaId\": 1,\n  \"motivo\": \"Este comentario no existe.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Banear comentario (MODERADOR)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 201) { pm.collectionVariables.set(\"sancionComentarioId\", pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoContenido\": \"COMENTARIO\",\n  \"contenidoId\": {{comentarioModerarId}},\n  \"accion\": \"BANEAR\",\n  \"normaId\": 1,\n  \"motivo\": \"Comentario ofensivo hacia otro usuario.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Comentarios del tema como USUARIO (sin el baneado)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"El comentario baneado no aparece\", function () { const ids = (pm.response.json()._embedded || {comentarios: []}).comentarios.map(c => c.id); pm.expect(ids).to.not.include(pm.collectionVariables.get(\"comentarioModerarId\")); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/1/comentarios",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "1",
+                    "comentarios"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Comentarios del tema como MODERADOR (con el baneado)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"El comentario aparece marcado como baneado\", function () { const c = pm.response.json()._embedded.comentarios.find(c => c.id === pm.collectionVariables.get(\"comentarioModerarId\")); pm.expect(c.baneado).to.eql(true); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/1/comentarios",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "1",
+                    "comentarios"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Restaurar comentario (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 201) { pm.collectionVariables.set(\"sancionRestaurarId\", pm.response.json().id); }",
+                      "pm.test(\"ms-foro confirma que volvió a estar visible\", function () { pm.expect(pm.response.json().resultado).to.include(\"visible\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoContenido\": \"COMENTARIO\",\n  \"contenidoId\": {{comentarioModerarId}},\n  \"accion\": \"RESTAURAR\",\n  \"motivo\": \"Revisado en apelación: no infringe las normas.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Restaurar tema (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "if (pm.response.code === 201) { pm.collectionVariables.set(\"sancionRestaurarTemaId\", pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoContenido\": \"TEMA\",\n  \"contenidoId\": {{temaModerarId}},\n  \"accion\": \"RESTAURAR\",\n  \"motivo\": \"La autora corrigió el tema y quitó la venta.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Tema restaurado visible para USUARIO",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Vuelve a estar ABIERTO\", function () { pm.expect(pm.response.json().estado).to.eql(\"ABIERTO\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/{{temaModerarId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "{{temaModerarId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenMatias}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Historial de sanciones del tema (MODERADOR)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Tiene el baneo y la restauración\", function () { pm.expect(pm.response.json()._embedded.sanciones.length).to.eql(2); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones?tipo=TEMA&contenidoId={{temaModerarId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones"
+                  ],
+                  "query": [
+                    {
+                      "key": "tipo",
+                      "value": "TEMA"
+                    },
+                    {
+                      "key": "contenidoId",
+                      "value": "{{temaModerarId}}"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Historial como USUARIO (403)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Obtener sanción",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Enlaza la norma y el reporte\", function () { pm.expect(pm.response.json()._links.norma).to.exist; pm.expect(pm.response.json()._links.reporte).to.exist; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones/{{sancionTemaId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones",
+                    "{{sancionTemaId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Obtener sanción inexistente (404)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 404\", function () { pm.response.to.have.status(404); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones/99999",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones",
+                    "99999"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Corregir motivo de una sanción (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });",
+                      "pm.test(\"Cambió el motivo\", function () { pm.expect(pm.response.json().motivo).to.include(\"del foro\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones/{{sancionComentarioId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones",
+                    "{{sancionComentarioId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"motivo\": \"Lenguaje ofensivo hacia otro usuario del foro.\",\n  \"normaId\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Corregir sanción como MODERADOR (403)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones/{{sancionComentarioId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones",
+                    "{{sancionComentarioId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"motivo\": \"Intento de corrección sin permiso.\",\n  \"normaId\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenModerador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar sanción del historial (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones/{{sancionRestaurarId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones",
+                    "{{sancionRestaurarId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Retirar tema de prueba (autora)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/temas/{{temaModerarId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "temas",
+                    "{{temaModerarId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenCamila}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Retirar comentario de prueba (autor)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"Devuelve JSON\", function () { pm.response.to.be.json; });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{foroUrl}}/api/comentarios/{{comentarioModerarId}}",
+                  "host": [
+                    "{{foroUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "comentarios",
+                    "{{comentarioModerarId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenMatias}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Limpieza: borrar sanción del baneo del tema (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones/{{sancionTemaId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones",
+                    "{{sancionTemaId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Limpieza: borrar sanción de la restauración del tema (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones/{{sancionRestaurarTemaId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones",
+                    "{{sancionRestaurarTemaId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Limpieza: borrar sanción del comentario (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/sanciones/{{sancionComentarioId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "sanciones",
+                    "{{sancionComentarioId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Limpieza: borrar reporte del tema (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes/{{reporteTemaId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes",
+                    "{{reporteTemaId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Limpieza: borrar reporte del comentario (ADMIN)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{moderacionUrl}}/api/reportes/{{reporteComentarioId}}",
+                  "host": [
+                    "{{moderacionUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reportes",
+                    "{{reporteComentarioId}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{tokenAdmin}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "variable": [
@@ -2920,6 +5595,50 @@
     },
     {
       "key": "nuevoComentarioId",
+      "value": ""
+    },
+    {
+      "key": "moderacionUrl",
+      "value": "http://localhost:8083"
+    },
+    {
+      "key": "codigoNorma",
+      "value": ""
+    },
+    {
+      "key": "nuevaNormaId",
+      "value": ""
+    },
+    {
+      "key": "temaModerarId",
+      "value": ""
+    },
+    {
+      "key": "comentarioModerarId",
+      "value": ""
+    },
+    {
+      "key": "reporteTemaId",
+      "value": ""
+    },
+    {
+      "key": "reporteComentarioId",
+      "value": ""
+    },
+    {
+      "key": "sancionTemaId",
+      "value": ""
+    },
+    {
+      "key": "sancionComentarioId",
+      "value": ""
+    },
+    {
+      "key": "sancionRestaurarId",
+      "value": ""
+    },
+    {
+      "key": "sancionRestaurarTemaId",
       "value": ""
     }
   ]

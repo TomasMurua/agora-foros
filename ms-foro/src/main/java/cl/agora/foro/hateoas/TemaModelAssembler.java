@@ -16,8 +16,8 @@ public class TemaModelAssembler implements RepresentationModelAssembler<TemaResp
     @Override
     public EntityModel<TemaResponse> toModel(TemaResponse t) {
         return EntityModel.of(t,
-                linkTo(methodOn(TemaController.class).visualizar(t.id())).withSelfRel(),
-                linkTo(methodOn(TemaController.class).comentarios(t.id())).withRel("comentarios"),
+                linkTo(methodOn(TemaController.class).visualizar(t.id(), null, null)).withSelfRel(),
+                linkTo(methodOn(TemaController.class).comentarios(t.id(), null)).withRel("comentarios"),
                 linkTo(methodOn(CategoriaController.class).obtener(t.categoriaId())).withRel("categoria"));
     }
 }

@@ -9,6 +9,7 @@ import cl.agora.foro.dto.MensajeResponse;
 import cl.agora.foro.dto.TemaResponse;
 import cl.agora.foro.hateoas.CategoriaModelAssembler;
 import cl.agora.foro.hateoas.TemaModelAssembler;
+import cl.agora.foro.security.UsuarioActual;
 import cl.agora.foro.service.CategoriaService;
 import cl.agora.foro.service.TemaService;
 import jakarta.validation.Valid;
@@ -17,6 +18,8 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,9 +53,11 @@ public class CategoriaController {
 
     /** Temas publicados en la categoria, los mas recientes primero. */
     @GetMapping("/{id}/temas")
-    public ResponseEntity<CollectionModel<EntityModel<TemaResponse>>> temas(@PathVariable Long id) {
-        return ResponseEntity.ok(temaAssembler.toCollectionModel(temaService.listarPorCategoria(id))
-                .add(linkTo(methodOn(CategoriaController.class).temas(id)).withSelfRel())
+    public ResponseEntity<CollectionModel<EntityModel<TemaResponse>>> temas(@PathVariable Long id,
+                                                                            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(temaAssembler.toCollectionModel(
+                        temaService.listarPorCategoria(id, UsuarioActual.desde(jwt)))
+                .add(linkTo(methodOn(CategoriaController.class).temas(id, null)).withSelfRel())
                 .add(linkTo(methodOn(CategoriaController.class).obtener(id)).withRel("categoria")));
     }
 

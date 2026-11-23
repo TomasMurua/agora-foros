@@ -1,0 +1,188 @@
+@if (tema(); as t) {
+  @if (visible()) {
+    <section class="cabecera-pagina cabecera-tema">
+      <div class="container">
+        <nav aria-label="Ruta de navegación">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a routerLink="/">Inicio</a></li>
+            @if (categoria(); as cat) {
+              <li class="breadcrumb-item"><a [routerLink]="['/categorias', cat.id]">{{ cat.nombre }}</a></li>
+            }
+            <li class="breadcrumb-item active text-truncate" aria-current="page">{{ t.titulo }}</li>
+          </ol>
+        </nav>
+        <div class="d-flex flex-wrap gap-2 mb-2">
+          <app-estado-badge [estado]="t.estado" />
+          @if (categoria(); as cat) {
+            <a class="chip-categoria" [routerLink]="['/categorias', cat.id]"><i class="bi" [class]="'bi bi-' + cat.icono" aria-hidden="true"></i>{{ cat.nombre }}</a>
+          }
+        </div>
+        <h1 class="titulo-pagina titulo-tema">{{ t.titulo }}</h1>
+      </div>
+    </section>
+
+    <div class="container pb-5">
+      <div class="row g-4">
+        <div class="col-12 col-lg-8">
+          @if (t.estado === 'BANEADO') {
+            <div class="alert alert-moderado d-flex gap-2" role="status">
+              <i class="bi bi-shield-exclamation fs-5" aria-hidden="true"></i>
+              <div>Este tema está baneado. Solo el equipo de moderación lo ve. Puedes restaurarlo desde aquí o desde el panel.</div>
+            </div>
+          }
+          <article class="panel tema-detalle">
+            <header class="d-flex align-items-center gap-3 mb-3">
+              <app-avatar [nombre]="t.autor" [color]="autor()?.colorAvatar" tamano="lg" />
+              <div>
+                <strong class="d-block">{{ autor()?.nombreCompleto ?? t.autor }}</strong>
+                <span class="texto-suave small">
+                  &#64;{{ t.autor }} · <time [attr.datetime]="t.fechaCreacion">{{ t.fechaCreacion | date: "d 'de' MMMM y, HH:mm" }}</time>
+                  @if (t.fechaActualizacion) { · editado {{ t.fechaActualizacion | tiempoRelativo }} }
+                </span>
+              </div>
+            </header>
+            <div class="tema-contenido">{{ t.contenido }}</div>
+            <footer class="tema-pie">
+              <span><i class="bi bi-eye" aria-hidden="true"></i> {{ t.vistas | plural: 'vista' : 'vistas' }}</span>
+              <span><i class="bi bi-chat-left-text" aria-hidden="true"></i> {{ comentariosVisibles() | plural: 'comentario' : 'comentarios' }}</span>
+            </footer>
+
+            <div class="tema-acciones">
+              @if (foro.puedeEditarTema(t)) {
+                <a class="btn btn-outline-primary btn-sm" [routerLink]="['/temas', t.id, 'editar']"><i class="bi bi-pencil" aria-hidden="true"></i> Editar</a>
+              }
+              @if (foro.puedeCambiarEstado(t)) {
+                <button type="button" class="btn btn-outline-secondary btn-sm" (click)="alternarEstado()">
+                  @if (t.estado === 'ABIERTO') {
+                    <i class="bi bi-lock" aria-hidden="true"></i> Cerrar tema
+                  } @else {
+                    <i class="bi bi-unlock" aria-hidden="true"></i> Reabrir tema
+                  }
+                </button>
+              }
+              @if (auth.estaAutenticado() && !foro.esAutor(t) && t.estado !== 'BANEADO') {
+                @if (moderacion.yaReportado('TEMA', t.id)) {
+                  <button type="button" class="btn btn-outline-secondary btn-sm" disabled><i class="bi bi-flag-fill" aria-hidden="true"></i> Reportado</button>
+                } @else {
+                  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="abrirDialogo('reportar', 'TEMA', t.id, t.titulo)"><i class="bi bi-flag" aria-hidden="true"></i> Reportar</button>
+                }
+              }
+              @if (auth.esModerador()) {
+                @if (t.estado === 'BANEADO') {
+                  <button type="button" class="btn btn-outline-success btn-sm" (click)="abrirDialogo('restaurar', 'TEMA', t.id, t.titulo)"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> Restaurar</button>
+                } @else {
+                  <button type="button" class="btn btn-outline-danger btn-sm" (click)="abrirDialogo('banear', 'TEMA', t.id, t.titulo)"><i class="bi bi-slash-circle" aria-hidden="true"></i> Banear</button>
+                }
+              }
+              @if (foro.puedeEliminarTema(t)) {
+                <button type="button" class="btn btn-outline-danger btn-sm" (click)="eliminarTema()"><i class="bi bi-trash" aria-hidden="true"></i> Eliminar</button>
+              }
+            </div>
+          </article>
+
+          <section class="mt-4" aria-labelledby="titulo-comentarios">
+            <h2 id="titulo-comentarios" class="h4 mb-3">Comentarios <span class="texto-suave">({{ comentariosVisibles() }})</span></h2>
+            @if (comentarios().length) {
+              <div class="d-grid gap-3">
+                @for (c of comentarios(); track c.id) {
+                  <app-comentario-item [comentario]="c" [permisos]="permisosDe(c)" [colorAutor]="colorDe(c.autor)" [esAutorTema]="c.usuarioId === t.usuarioId" [reportado]="moderacion.yaReportado('COMENTARIO', c.id)"
+                    (editar)="editarComentario(c.id, $event)" (eliminar)="eliminarComentario(c)"
+                    (reportar)="abrirDialogo('reportar', 'COMENTARIO', c.id, c.contenido)"
+                    (banear)="abrirDialogo('banear', 'COMENTARIO', c.id, c.contenido)"
+                    (restaurar)="abrirDialogo('restaurar', 'COMENTARIO', c.id, c.contenido)" />
+                }
+              </div>
+            } @else {
+              <p class="texto-suave">Todavía nadie comenta. Puedes ser la primera respuesta.</p>
+            }
+
+            <div class="panel mt-4">
+              @if (!auth.estaAutenticado()) {
+                <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
+                  <i class="bi bi-chat-dots fs-2 text-acento" aria-hidden="true"></i>
+                  <p class="mb-0 flex-grow-1">Inicia sesión para responder en este tema.</p>
+                  <a class="btn btn-primary" routerLink="/iniciar-sesion" [queryParams]="{ volver: '/temas/' + t.id }">Iniciar sesión</a>
+                </div>
+              } @else if (t.estado !== 'ABIERTO') {
+                <div class="d-flex align-items-center gap-3">
+                  <i class="bi bi-lock fs-3 texto-suave" aria-hidden="true"></i>
+                  <p class="mb-0">Este tema está {{ t.estado === 'CERRADO' ? 'cerrado' : 'baneado' }} y no recibe comentarios nuevos.</p>
+                </div>
+              } @else {
+                <form [formGroup]="formComentario" (ngSubmit)="comentar()" novalidate>
+                  <label for="nuevo-comentario" class="form-label fw-semibold">Tu respuesta</label>
+                  <textarea id="nuevo-comentario" class="form-control" rows="4" [formControl]="nuevoComentario" required
+                    [attr.minlength]="limites.min" [attr.maxlength]="limites.max" placeholder="Escribe tu comentario con respeto y aporta a la conversación."
+                    [class.is-invalid]="nuevoComentario.invalid && (nuevoComentario.touched || enviado())"></textarea>
+                  <div class="d-flex justify-content-between gap-2">
+                    <app-campo-error [control]="nuevoComentario" [enviado]="enviado()" />
+                    <app-contador-caracteres class="ms-auto" [control]="nuevoComentario" [maximo]="limites.max" />
+                  </div>
+                  <div class="text-end mt-2">
+                    <button type="submit" class="btn btn-primary" [disabled]="nuevoComentario.invalid && enviado()"><i class="bi bi-send" aria-hidden="true"></i> Comentar</button>
+                  </div>
+                </form>
+              }
+            </div>
+          </section>
+        </div>
+
+        <aside class="col-12 col-lg-4">
+          <div class="panel mb-3">
+            <h2 class="h6 text-uppercase texto-suave">Sobre el autor</h2>
+            <div class="d-flex align-items-center gap-3">
+              <app-avatar [nombre]="t.autor" [color]="autor()?.colorAvatar" />
+              <div>
+                <strong class="d-block">{{ t.autor }}</strong>
+                @if (autor(); as a) {
+                  <span class="small texto-suave">En Ágora desde {{ a.fechaRegistro | date: 'MMMM y' }}</span>
+                } @else {
+                  <span class="small texto-suave">Cuenta eliminada</span>
+                }
+              </div>
+            </div>
+            @if (autor()?.bio) {
+              <p class="small mt-3 mb-0">{{ autor()?.bio }}</p>
+            }
+          </div>
+          <div class="panel">
+            <h2 class="h6 text-uppercase texto-suave">Antes de responder</h2>
+            <ul class="small ps-3 mb-0">
+              <li>Respeta a las demás personas, aunque no estés de acuerdo.</li>
+              <li>No compartas datos personales ni claves.</li>
+              <li>Si algo no cumple las normas, repórtalo.</li>
+            </ul>
+            <a class="enlace-flecha small mt-2 d-inline-block" routerLink="/normas">Leer las normas <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    @if (dialogo(); as d) {
+      <app-dialogo-motivo
+        [titulo]="tituloDialogo(d)"
+        [icono]="d.accion === 'reportar' ? 'flag' : d.accion === 'banear' ? 'slash-circle' : 'arrow-counterclockwise'"
+        [descripcion]="d.accion === 'reportar' ? 'Tu reporte llega al equipo de moderación. Nadie más verá quién lo envió.' : d.accion === 'banear' ? 'El contenido dejará de verse para los usuarios y la sanción quedará en el historial.' : 'El contenido vuelve a verse y la restauración queda en el historial.'"
+        [contexto]="d.contexto"
+        [normas]="moderacion.normas()"
+        [pedirNorma]="d.accion !== 'restaurar'"
+        [etiquetaMotivo]="d.accion === 'reportar' ? 'Cuéntanos qué pasa' : 'Motivo'"
+        [textoConfirmar]="d.accion === 'reportar' ? 'Enviar reporte' : d.accion === 'banear' ? 'Banear' : 'Restaurar'"
+        [peligro]="d.accion === 'banear'"
+        (confirmar)="confirmarDialogo($event)"
+        (cancelar)="dialogo.set(null)" />
+    }
+  } @else {
+    <div class="container py-5">
+      <app-estado-vacio titulo="Este tema fue retirado por moderación" texto="No cumplía las normas del foro y ya no está disponible." imagen="ilustraciones/moderado.svg">
+        <a class="btn btn-primary" routerLink="/explorar">Volver a explorar</a>
+      </app-estado-vacio>
+    </div>
+  }
+} @else {
+  <div class="container py-5">
+    <app-estado-vacio titulo="El tema no existe" texto="Puede que lo hayan eliminado o que el enlace esté mal escrito." imagen="ilustraciones/no-encontrado.svg">
+      <a class="btn btn-primary" routerLink="/explorar">Volver a explorar</a>
+    </app-estado-vacio>
+  </div>
+}

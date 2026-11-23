@@ -16,7 +16,7 @@ public class ComentarioModelAssembler implements RepresentationModelAssembler<Co
     @Override
     public EntityModel<ComentarioResponse> toModel(ComentarioResponse c) {
         return EntityModel.of(c,
-                linkTo(methodOn(ComentarioController.class).obtener(c.id())).withSelfRel(),
-                linkTo(methodOn(TemaController.class).visualizar(c.temaId())).withRel("tema"));
+                linkTo(methodOn(ComentarioController.class).obtener(c.id(), null)).withSelfRel(),
+                linkTo(methodOn(TemaController.class).visualizar(c.temaId(), null, null)).withRel("tema"));
     }
 }
