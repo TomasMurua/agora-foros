@@ -6,7 +6,7 @@ foro lo reporta, y un moderador o administrador lo banea.
 
 La versión 2.0.0 agrega el tercer microservicio (`ms-moderacion`), el frontend, un arquetipo Maven del que salen
 los tres microservicios y el despliegue con Docker en la nube. En esta versión el frontend y el backend funcionan
-por separado: el frontend trabaja con listas en memoria y el backend se prueba con Postman.
+por separado. El frontend trabaja con listas en memoria y el backend se prueba con Postman.
 
 ## Arquitectura
 
@@ -47,7 +47,7 @@ comentario puede estar baneado. Lo baneado responde 404 a quien no es moderador 
 `ms-moderacion` es el tercer microservicio del caso. Guarda las normas del foro, los reportes de los usuarios y el
 historial de sanciones. Cuando un moderador banea o restaura algo, `ms-moderacion` registra la sanción y llama a
 `ms-foro` con el mismo token del moderador, así `ms-foro` sigue aplicando sus propios permisos. La sanción se guarda
-dentro de una transacción que termina con esa llamada: si `ms-foro` responde con error, la sanción no queda.
+dentro de una transacción que termina con esa llamada. Si `ms-foro` responde con error, la sanción no queda.
 
 ```mermaid
 sequenceDiagram
@@ -149,7 +149,7 @@ después pide la nueva contraseña. Como no hay pagos en el caso, no hay ninguna
 
 Patrones del frontend:
 
-- Repository. `core/repositories/repositorio-memoria.ts` es la base: guarda el arreglo en un `signal` privado y lo
+- Repository. `core/repositories/repositorio-memoria.ts` es la base. Guarda el arreglo en un `signal` privado y lo
   reemplaza en cada cambio, nunca lo modifica. Hay un repositorio por entidad (`usuario`, `foro` y `moderacion`).
 - Facade. `core/facades/` tiene `AuthFacade`, `ForoFacade`, `ModeracionFacade` y `AdminFacade`. Son lo único que
   inyectan los componentes y concentran las reglas, por ejemplo que nadie reporte su propio contenido o que no se borre
@@ -159,7 +159,7 @@ Patrones del frontend:
 - Las páginas de `features/` son contenedoras y los componentes de `shared/components` solo reciben datos y emiten
   eventos.
 
-Validaciones: cada formulario es un Reactive Form y repite las reglas en los atributos HTML (`required`, `minlength`,
+Cada formulario es un Reactive Form y repite las reglas en los atributos HTML (`required`, `minlength`,
 `maxlength`, `pattern`, `type="email"`), con un mensaje en español bajo cada campo. Los validadores están en
 `core/validators/agora.validators.ts`. La contraseña tiene siete reglas y una lista bajo el campo muestra cuáles
 faltan: entre 8 y 20 caracteres, una mayúscula, una minúscula, un número, un carácter especial, sin espacios y sin el
@@ -186,7 +186,7 @@ Uso GitFlow, la estrategia de la guía con ramas de largo plazo y ramas por tare
 
 La guía muestra Trunk Based Development como la mejor opción para microservicios, con un repositorio por servicio y
 merges diarios a `main`. Aquí los tres microservicios, el arquetipo y el frontend viven en un solo repositorio, y cada
-evaluación es una versión cerrada. Por eso me sirve más GitFlow: `main` queda igual a lo último que entregué mientras
+evaluación es una versión cerrada. Por eso me sirve más GitFlow. `main` queda igual a lo último que entregué mientras
 `develop` avanza.
 
 Las ramas de la versión 2.0.0 son `feature/arquetipo`, `feature/foro-baneo`, `feature/servicios-arquetipo`,
@@ -226,23 +226,27 @@ servicio no arranca. Para revisar los datos con SQL Developer, conéctate a `loc
 
 ## Despliegue en la nube
 
-La nube es una VM de Azure con Docker. Las imágenes se publican en Azure Container Registry y la VM solo las
-descarga: no compila nada. `deploy/docker-compose.yml` levanta Oracle, los tres microservicios, el frontend y Caddy, que
-saca el certificado HTTPS y reparte las rutas por prefijo según el diagrama de arriba. Los microservicios corren con el
-perfil `cloud`, que exige una clave JWT propia.
+La versión 2.0.0 corre en https://agora-foros.eastus2.cloudapp.azure.com, una VM de Azure con Docker. Las imágenes
+se publican en Azure Container Registry y la VM solo las descarga, no compila nada. `deploy/docker-compose.yml` levanta
+Oracle, los tres microservicios, el frontend y Caddy, que saca el certificado HTTPS y reparte las rutas por prefijo
+según el diagrama de arriba. Los microservicios corren con el perfil `cloud`, que exige una clave JWT propia. El estado
+de cada microservicio se ve en `/salud/usuarios`, `/salud/foro` y `/salud/moderacion`.
 
-Con el nombre DNS del paso 1, la URL pública queda en https://agora-foros.eastus2.cloudapp.azure.com. El estado de
-cada microservicio se ve en `/salud/usuarios`, `/salud/foro` y `/salud/moderacion`.
+Así lo desplegué, en la región `eastus2`:
 
-1. Crear el registry y la VM, en este caso en la región `eastus2`:
+1. Crear el registry, un token de solo lectura para que la VM descargue las imágenes, y la VM. El puerto 22 queda
+   abierto solo para mi IP:
 
    ```bash
    az group create -n rg-agora-foros -l eastus2
    az acr create -g rg-agora-foros -n agoraforos --sku Basic
+   az acr token create -n vm-pull -r agoraforos --scope-map _repositories_pull
    az vm create -g rg-agora-foros -n vm-agora-foros --image Ubuntu2404 --size Standard_B2s \
      --admin-username azureuser --ssh-key-values ~/.ssh/id_ed25519.pub \
      --public-ip-sku Standard --public-ip-address-dns-name agora-foros
    az vm open-port -g rg-agora-foros -n vm-agora-foros --port 80,443 --priority 900
+   az network nsg rule update -g rg-agora-foros --nsg-name vm-agora-forosNSG -n default-allow-ssh \
+     --source-address-prefixes <mi IP>/32
    ```
 
 2. Publicar las imágenes desde el equipo de desarrollo. El script las construye para `linux/amd64`, aunque el equipo
@@ -253,14 +257,16 @@ cada microservicio se ve en `/salud/usuarios`, `/salud/foro` y `/salud/moderacio
    deploy/publicar-imagenes.sh agoraforos.azurecr.io 2.0.0
    ```
 
-3. En la VM: instalar Docker, clonar el repositorio, completar `deploy/.env` a partir de `deploy/.env.example` y
-   levantar todo. La VM inicia sesión en el registry con un token de solo lectura:
+3. En la VM, instalar Docker, clonar el repositorio, completar `deploy/.env` a partir de `deploy/.env.example` y
+   levantar todo. La B2s tiene 4 GB de RAM y Oracle con los tres microservicios ocupa casi 3, así que le agregué 4 GB
+   de swap. `docker login` pide la clave del token `vm-pull`:
 
    ```bash
    curl -fsSL https://get.docker.com | sudo sh && sudo usermod -aG docker $USER   # y volver a entrar
+   sudo fallocate -l 4G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile
    git clone https://github.com/TomasMurua/agora-foros.git && cd agora-foros/deploy
    cp .env.example .env && nano .env
-   docker login agoraforos.azurecr.io
+   docker login agoraforos.azurecr.io -u vm-pull
    docker compose pull && docker compose up -d
    ```
 
